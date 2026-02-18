@@ -1,27 +1,33 @@
-# headlamp-rook-ceph-plugin
+# CLAUDE.md
 
-Headlamp plugin for Rook-Ceph cluster visibility.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project
+
+Headlamp plugin for Rook-Ceph cluster visibility.
 
 - **Plugin name**: `headlamp-rook-ceph-plugin`
 - **Rook-Ceph API group**: `ceph.rook.io/v1`
 - **Default namespace**: `rook-ceph`
-- **RBD provisioner**: `rook-ceph.rbd.csi.ceph.com`
-- **CephFS provisioner**: `rook-ceph.cephfs.csi.ceph.com`
 - **Reference plugin**: `../headlamp-tns-csi-plugin`
 
 ## Commands
 
 ```bash
-npm start          # dev server with hot reload
-npm run build      # production build
-npm run package    # package for headlamp
-npm run tsc        # TypeScript type check (no emit)
-npm run lint       # ESLint
-npm test           # vitest run
-npm run test:watch # vitest watch mode
+npm start              # dev server with hot reload
+npm run build          # production build
+npm run package        # package for headlamp
+npm run tsc            # TypeScript type check (no emit)
+npm run lint           # ESLint
+npm run lint:fix       # ESLint with auto-fix
+npm run format         # Prettier write
+npm run format:check   # Prettier check
+npm test               # vitest run (all tests)
+npm run test:watch     # vitest watch mode
+npx vitest run src/api/k8s.test.ts  # run a single test file
 ```
+
+All tests and `tsc` must pass before committing.
 
 ## Architecture
 
@@ -46,6 +52,16 @@ src/
         └── StorageClassColumns.tsx     # Column processors for SC + PV tables
 ```
 
+## Data flow
+
+`RookCephDataContext.tsx` uses **two fetching strategies**:
+
+1. **Headlamp hooks** (`K8s.ResourceClasses.*.useList()`) — for StorageClasses, PVs, PVCs. These return Headlamp `KubeObject` class instances whose raw JSON is stored under `.jsonData`. The `extractJsonData()` helper in the context provider unwraps them to plain objects before passing to the type-guard filters in `k8s.ts`.
+
+2. **`ApiProxy.request()`** — for Rook CRDs (`cephclusters`, `cephblockpools`, `cephfilesystems`, `cephobjectstores`) and daemon pods, since these aren't in Headlamp's built-in resource classes. Fetched in a single `useEffect` keyed on `refreshKey`.
+
+All pages consume data exclusively via `useRookCephContext()`. The provider is re-wrapped per route and per detail-section registration in `index.tsx`.
+
 ## Key constants (src/api/k8s.ts)
 
 - Namespace: `rook-ceph`
@@ -63,15 +79,9 @@ src/
 - TypeScript strict mode — no `any`, use `unknown` + type guards at API boundaries
 - Context provider (`RookCephDataProvider`) wraps each route component in `index.tsx`
 - Tests: vitest + @testing-library/react, mock with `vi.mock('@kinvolk/headlamp-plugin/lib', ...)`
+- `vitest.setup.ts` provides a spec-compliant `localStorage` shim for Node 22+ compatibility
 
 ## Testing
-
-All tests must pass before committing:
-
-```bash
-npm test        # tests across test files
-npm run tsc     # must exit 0
-```
 
 Mock pattern for headlamp APIs:
 ```typescript
@@ -86,3 +96,5 @@ vi.mock('@kinvolk/headlamp-plugin/lib', () => ({
   },
 }));
 ```
+
+The mock import must appear **before** the module under test is imported (see `RookCephDataContext.test.tsx`).
