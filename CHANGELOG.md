@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-02-18
+
+### Changed
+
+- Transferred repository to `privilegedescalation` GitHub organization
+- Updated all repo URLs in `package.json` to new organization
+- Expanded `CLAUDE.md` with data flow architecture, additional dev commands, and test notes
+
 ## [0.1.0] - 2026-02-18
 
 ### Added
@@ -32,5 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript strict mode with zero `any` types
 - ESLint + Prettier code quality tooling
 
-[Unreleased]: https://github.com/cpfarhood/headlamp-rook-ceph-plugin/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/cpfarhood/headlamp-rook-ceph-plugin/releases/tag/v0.1.0
+[Unreleased]: https://github.com/privilegedescalation/headlamp-rook-ceph-plugin/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/privilegedescalation/headlamp-rook-ceph-plugin/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/privilegedescalation/headlamp-rook-ceph-plugin/releases/tag/v0.1.0
