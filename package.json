@@ -4,13 +4,13 @@
   "description": "Headlamp plugin for Rook-Ceph cluster visibility and CSI driver monitoring",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cpfarhood/headlamp-rook-ceph-plugin.git"
+    "url": "https://github.com/privilegedescalation/headlamp-rook-ceph-plugin.git"
   },
   "bugs": {
-    "url": "https://github.com/cpfarhood/headlamp-rook-ceph-plugin/issues"
+    "url": "https://github.com/privilegedescalation/headlamp-rook-ceph-plugin/issues"
   },
-  "homepage": "https://github.com/cpfarhood/headlamp-rook-ceph-plugin#readme",
-  "author": "cpfarhood",
+  "homepage": "https://github.com/privilegedescalation/headlamp-rook-ceph-plugin#readme",
+  "author": "privilegedescalation",
   "license": "Apache-2.0",
   "scripts": {
     "start": "headlamp-plugin start",
