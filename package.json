@@ -1,0 +1,30 @@
+{
+  "name": "headlamp-rook-ceph-plugin",
+  "version": "0.1.0",
+  "description": "Headlamp plugin for Rook-Ceph cluster visibility and CSI driver monitoring",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cpfarhood/headlamp-rook-ceph-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cpfarhood/headlamp-rook-ceph-plugin/issues"
+  },
+  "homepage": "https://github.com/cpfarhood/headlamp-rook-ceph-plugin#readme",
+  "author": "cpfarhood",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "headlamp-plugin start",
+    "build": "headlamp-plugin build",
+    "package": "headlamp-plugin package",
+    "tsc": "tsc --noEmit",
+    "lint": "eslint --ext .ts,.tsx src/",
+    "lint:fix": "eslint --ext .ts,.tsx --fix src/",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@kinvolk/headlamp-plugin": "^0.13.0"
+  }
+}

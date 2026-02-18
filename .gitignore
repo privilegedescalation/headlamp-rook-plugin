@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.tar.gz
+.playwright-mcp/
+.mcp.json

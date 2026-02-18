@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (without v prefix, e.g., 0.2.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Validate version format
+        run: |
+          if ! echo "${{ inputs.version }}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Version must be in format X.Y.Z (e.g., 0.2.0)"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update package.json version
+        run: |
+          jq --arg version "${{ inputs.version }}" '.version = $version' package.json > package.json.tmp
+          mv package.json.tmp package.json
+
+      - name: Update artifacthub-pkg.yml version and URL
+        run: |
+          VERSION="${{ inputs.version }}"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/headlamp-rook-ceph-plugin-${VERSION}.tar.gz"
+
+          sed -i "s|^version:.*|version: \"${VERSION}\"|" artifacthub-pkg.yml
+          sed -i "s|headlamp/plugin/archive-url:.*|headlamp/plugin/archive-url: \"${RELEASE_URL}\"|" artifacthub-pkg.yml
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build plugin
+        run: npx @kinvolk/headlamp-plugin build
+
+      - name: Package plugin
+        run: npx @kinvolk/headlamp-plugin package
+
+      - name: Validate tarball name
+        run: |
+          EXPECTED="headlamp-rook-ceph-plugin-${{ inputs.version }}.tar.gz"
+          ACTUAL=$(ls *.tar.gz)
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "::error::Tarball name mismatch! Expected: $EXPECTED, Got: $ACTUAL"
+            exit 1
+          fi
+          echo "✓ Tarball name validated: $ACTUAL"
+
+      - name: Compute checksum
+        id: compute_checksum
+        run: |
+          TARBALL="headlamp-rook-ceph-plugin-${{ inputs.version }}.tar.gz"
+          CHECKSUM=$(sha256sum "$TARBALL" | awk '{print $1}')
+          echo "checksum=${CHECKSUM}" >> $GITHUB_OUTPUT
+          echo "Checksum: sha256:${CHECKSUM}"
+
+      - name: Update checksum in metadata
+        run: |
+          CHECKSUM="${{ steps.compute_checksum.outputs.checksum }}"
+          sed -i "s|headlamp/plugin/archive-checksum:.*|headlamp/plugin/archive-checksum: \"sha256:${CHECKSUM}\"|" artifacthub-pkg.yml
+
+      - name: Commit version bump and metadata
+        run: |
+          git add package.json artifacthub-pkg.yml
+          git commit -m "chore: release v${{ inputs.version }}"
+          git push origin main
+
+      - name: Create and push tag
+        run: |
+          git tag "v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ inputs.version }}"
+          files: headlamp-rook-ceph-plugin-${{ inputs.version }}.tar.gz
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "✓ Version bumped to ${{ inputs.version }}"
+          echo "✓ Metadata updated with checksum sha256:${{ steps.compute_checksum.outputs.checksum }}"
+          echo "✓ Tag v${{ inputs.version }} created"
+          echo "✓ GitHub release published with tarball"
