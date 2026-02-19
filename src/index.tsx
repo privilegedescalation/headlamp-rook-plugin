@@ -32,7 +32,7 @@ import VolumesPage from './components/VolumesPage';
 registerSidebarEntry({
   parent: null,
   name: 'rook-ceph',
-  label: 'Rook-Ceph',
+  label: 'Rook',
   url: '/rook-ceph',
   icon: 'mdi:database-cog',
 });
@@ -202,12 +202,40 @@ registerDetailsViewSection(({ resource }) => {
 // Table column processors — native StorageClass and PV tables
 // ---------------------------------------------------------------------------
 
+// Merges incoming columns into existing ones by label.
+// If a column with the same label already exists, the incoming getValue/render
+// takes priority and falls back to the existing one (for mixed-driver tables).
+function mergeColumns<T>(
+  existing: T[],
+  incoming: Array<{ label: string; getValue: (r: unknown) => unknown; render: (r: unknown) => React.ReactNode }>
+): T[] {
+  type ObjCol = { label: string; getValue: (r: unknown) => unknown; render: (r: unknown) => React.ReactNode };
+  const isObjCol = (c: unknown): c is ObjCol =>
+    typeof c === 'object' && c !== null && 'label' in c;
+  const result = [...existing];
+  const toAppend: typeof incoming = [];
+  for (const col of incoming) {
+    const idx = result.findIndex(c => isObjCol(c) && (c as ObjCol).label === col.label);
+    if (idx !== -1) {
+      const prev = result[idx] as ObjCol;
+      result[idx] = {
+        label: col.label,
+        getValue: (r: unknown) => col.getValue(r) ?? prev.getValue(r),
+        render: (r: unknown) => col.getValue(r) !== null ? col.render(r) : prev.render(r),
+      } as unknown as T;
+    } else {
+      toAppend.push(col);
+    }
+  }
+  return [...result, ...(toAppend as unknown as T[])];
+}
+
 registerResourceTableColumnsProcessor(({ id, columns }) => {
   if (id === 'headlamp-storageclasses') {
-    return [...columns, ...buildStorageClassColumns()];
+    return mergeColumns(columns, buildStorageClassColumns());
   }
   if (id === 'headlamp-persistentvolumes') {
-    return [...columns, ...buildPVColumns()];
+    return mergeColumns(columns, buildPVColumns());
   }
   return columns;
 });
