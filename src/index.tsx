@@ -6,7 +6,6 @@
  */
 
 import {
-  registerAppBarAction,
   registerDetailsViewSection,
   registerResourceTableColumnsProcessor,
   registerRoute,
@@ -14,10 +13,11 @@ import {
 } from '@kinvolk/headlamp-plugin/lib';
 import React from 'react';
 import { RookCephDataProvider } from './api/RookCephDataContext';
-import AppBarClusterBadge from './components/AppBarClusterBadge';
 import BlockPoolsPage from './components/BlockPoolsPage';
 import CephPodDetailSection from './components/CephPodDetailSection';
+import FilesystemsPage from './components/FilesystemsPage';
 import { buildPVColumns, buildStorageClassColumns } from './components/integrations/StorageClassColumns';
+import ObjectStoresPage from './components/ObjectStoresPage';
 import OverviewPage from './components/OverviewPage';
 import PodsPage from './components/PodsPage';
 import PVCDetailSection from './components/PVCDetailSection';
@@ -55,6 +55,22 @@ registerSidebarEntry({
 
 registerSidebarEntry({
   parent: 'rook-ceph',
+  name: 'rook-ceph-filesystems',
+  label: 'Filesystems',
+  url: '/rook-ceph/filesystems',
+  icon: 'mdi:folder-network',
+});
+
+registerSidebarEntry({
+  parent: 'rook-ceph',
+  name: 'rook-ceph-objectstores',
+  label: 'Object Stores',
+  url: '/rook-ceph/object-stores',
+  icon: 'mdi:bucket',
+});
+
+registerSidebarEntry({
+  parent: 'rook-ceph',
   name: 'rook-ceph-pods',
   label: 'Pods',
   url: '/rook-ceph/pods',
@@ -85,6 +101,30 @@ registerRoute({
   component: () => (
     <RookCephDataProvider>
       <BlockPoolsPage />
+    </RookCephDataProvider>
+  ),
+});
+
+registerRoute({
+  path: '/rook-ceph/filesystems',
+  sidebar: 'rook-ceph-filesystems',
+  name: 'rook-ceph-filesystems',
+  exact: true,
+  component: () => (
+    <RookCephDataProvider>
+      <FilesystemsPage />
+    </RookCephDataProvider>
+  ),
+});
+
+registerRoute({
+  path: '/rook-ceph/object-stores',
+  sidebar: 'rook-ceph-objectstores',
+  name: 'rook-ceph-objectstores',
+  exact: true,
+  component: () => (
+    <RookCephDataProvider>
+      <ObjectStoresPage />
     </RookCephDataProvider>
   ),
 });
@@ -172,12 +212,3 @@ registerResourceTableColumnsProcessor(({ id, columns }) => {
   return columns;
 });
 
-// ---------------------------------------------------------------------------
-// App bar action — cluster health badge
-// ---------------------------------------------------------------------------
-
-registerAppBarAction(() => (
-  <RookCephDataProvider>
-    <AppBarClusterBadge />
-  </RookCephDataProvider>
-));

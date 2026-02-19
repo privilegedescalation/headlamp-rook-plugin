@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   filterRookCephPersistentVolumes,
+  filterRookCephPVCs,
   filterRookCephStorageClasses,
-  formatAge,
+  findBoundPv,
   formatAccessModes,
+  formatAge,
   formatBytes,
   formatStorageType,
+  getPodRestarts,
   healthToStatus,
   isKubeList,
   isPodReady,
@@ -17,9 +20,6 @@ import {
   ROOK_CEPH_CEPHFS_PROVISIONER,
   ROOK_CEPH_RBD_PROVISIONER,
   storageClassType,
-  filterRookCephPVCs,
-  findBoundPv,
-  getPodRestarts,
 } from './k8s';
 
 describe('isRookCephProvisioner', () => {
