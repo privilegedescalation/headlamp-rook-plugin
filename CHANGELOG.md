@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-02-19
+
+### Changed
+
+- **Package name** — renamed from `headlamp-rook-plugin` to `rook` so the plugin displays correctly in Headlamp's Plugins list
+
 ## [0.2.1] - 2026-02-19
 
 ### Fixed
@@ -66,7 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript strict mode with zero `any` types
 - ESLint + Prettier code quality tooling
 
-[Unreleased]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.1.3...v0.2.0
 [0.1.3]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.1.2...v0.1.3

@@ -1,4 +1,4 @@
-version: "0.2.1"
+version: "0.2.2"
 name: headlamp-rook-plugin
 displayName: Rook Plugin
 createdAt: "2026-02-18T00:00:00Z"
@@ -23,13 +23,11 @@ maintainers:
 provider:
   name: privilegedescalation
 changes:
-  - kind: fixed
-    description: "Duplicate Protocol/Pool columns on mixed-driver clusters now merged into a single shared column"
   - kind: changed
-    description: "Sidebar navigation label renamed from Rook-Ceph to Rook"
+    description: "Package renamed to rook so the plugin displays correctly in Headlamp's Plugins list"
 
 annotations:
-  headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-plugin/releases/download/v0.2.1/headlamp-rook-plugin-0.2.1.tar.gz"
-  headlamp/plugin/archive-checksum: "sha256:6cfe751bc06cf77cf1b96013fdb83d4e1db9ac3793e9aca82316546debd3e846"
+  headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-plugin/releases/download/v0.2.2/rook-0.2.2.tar.gz"
+  headlamp/plugin/archive-checksum: "sha256:0c0d39f275f206cd0fe66a17f98c9bf0b9a5d74122bad770c7d4051e59f85675"
   headlamp/plugin/distro-compat: ""
   headlamp/plugin/version-compat: ">=0.20"
