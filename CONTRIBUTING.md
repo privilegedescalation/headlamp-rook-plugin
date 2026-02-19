@@ -5,8 +5,8 @@ Contributions are welcome! Please open an issue before submitting large PRs.
 ## Development Setup
 
 ```bash
-git clone https://github.com/cpfarhood/headlamp-rook-ceph-plugin.git
-cd headlamp-rook-ceph-plugin
+git clone https://github.com/cpfarhood/headlamp-rook-plugin.git
+cd headlamp-rook-plugin
 npm install
 npm start   # hot-reload dev server
 ```

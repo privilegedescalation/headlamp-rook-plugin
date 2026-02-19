@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Headlamp plugin for Rook-Ceph cluster visibility.
 
-- **Plugin name**: `headlamp-rook-ceph-plugin`
+- **Plugin name**: `headlamp-rook-plugin`
 - **Rook-Ceph API group**: `ceph.rook.io/v1`
 - **Default namespace**: `rook-ceph`
 - **Reference plugin**: `../headlamp-tns-csi-plugin`

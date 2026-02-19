@@ -37,7 +37,7 @@ jobs:
       - name: Update artifacthub-pkg.yml version and URL
         run: |
           VERSION="${{ inputs.version }}"
-          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/headlamp-rook-ceph-plugin-${VERSION}.tar.gz"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/headlamp-rook-plugin-${VERSION}.tar.gz"
 
           sed -i "s|^version:.*|version: \"${VERSION}\"|" artifacthub-pkg.yml
           sed -i "s|headlamp/plugin/archive-url:.*|headlamp/plugin/archive-url: \"${RELEASE_URL}\"|" artifacthub-pkg.yml
@@ -59,7 +59,7 @@ jobs:
 
       - name: Validate tarball name
         run: |
-          EXPECTED="headlamp-rook-ceph-plugin-${{ inputs.version }}.tar.gz"
+          EXPECTED="headlamp-rook-plugin-${{ inputs.version }}.tar.gz"
           ACTUAL=$(ls *.tar.gz)
           if [ "$EXPECTED" != "$ACTUAL" ]; then
             echo "::error::Tarball name mismatch! Expected: $EXPECTED, Got: $ACTUAL"
@@ -70,7 +70,7 @@ jobs:
       - name: Compute checksum
         id: compute_checksum
         run: |
-          TARBALL="headlamp-rook-ceph-plugin-${{ inputs.version }}.tar.gz"
+          TARBALL="headlamp-rook-plugin-${{ inputs.version }}.tar.gz"
           CHECKSUM=$(sha256sum "$TARBALL" | awk '{print $1}')
           echo "checksum=${CHECKSUM}" >> $GITHUB_OUTPUT
           echo "Checksum: sha256:${CHECKSUM}"
@@ -95,7 +95,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "v${{ inputs.version }}"
-          files: headlamp-rook-ceph-plugin-${{ inputs.version }}.tar.gz
+          files: headlamp-rook-plugin-${{ inputs.version }}.tar.gz
           fail_on_unmatched_files: true
           draft: false
           prerelease: false

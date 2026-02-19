@@ -1,12 +1,12 @@
 version: "0.1.3"
-name: headlamp-rook-ceph-plugin
-displayName: Rook-Ceph Plugin
+name: headlamp-rook-plugin
+displayName: Rook Plugin
 createdAt: "2026-02-18T00:00:00Z"
 description: Headlamp plugin for Rook-Ceph cluster visibility — CephCluster health, pool status, CSI driver monitoring, and native Headlamp StorageClass/PV integrations.
 logoPath: ""
 digest: ""
 license: Apache-2.0
-homeURL: https://github.com/privilegedescalation/headlamp-rook-ceph-plugin
+homeURL: https://github.com/privilegedescalation/headlamp-rook-plugin
 keywords:
   - rook
   - ceph
@@ -16,14 +16,14 @@ keywords:
   - kubernetes
 links:
   - name: source
-    url: https://github.com/privilegedescalation/headlamp-rook-ceph-plugin
+    url: https://github.com/privilegedescalation/headlamp-rook-plugin
 maintainers:
   - name: privilegedescalation
     email: privilegedescalation@users.noreply.github.com
 provider:
   name: privilegedescalation
 annotations:
-  headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-ceph-plugin/releases/download/v0.1.3/headlamp-rook-ceph-plugin-0.1.3.tar.gz"
+  headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-plugin/releases/download/v0.1.3/headlamp-rook-plugin-0.1.3.tar.gz"
   headlamp/plugin/archive-checksum: "sha256:01611912597b4739ca62cd1f4ae0dd42755bb8e3541dafa5dedbfdcf1202072e"
   headlamp/plugin/distro-compat: ""
   headlamp/plugin/version-compat: ">=0.20"

@@ -1,5 +1,5 @@
 /**
- * headlamp-rook-ceph-plugin — entry point.
+ * headlamp-rook-plugin — entry point.
  *
  * Registers sidebar entries, routes, detail view sections, table column
  * processors, and app bar action for Rook-Ceph visibility in Headlamp.

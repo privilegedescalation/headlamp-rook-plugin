@@ -8,7 +8,7 @@
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities by opening a [GitHub Security Advisory](https://github.com/cpfarhood/headlamp-rook-ceph-plugin/security/advisories/new) rather than a public issue.
+Please report security vulnerabilities by opening a [GitHub Security Advisory](https://github.com/cpfarhood/headlamp-rook-plugin/security/advisories/new) rather than a public issue.
 
 ## Scope
 

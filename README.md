@@ -1,6 +1,6 @@
-# Headlamp Rook-Ceph Plugin
+# Headlamp Rook Plugin
 
-[![CI](https://github.com/cpfarhood/headlamp-rook-ceph-plugin/actions/workflows/ci.yaml/badge.svg)](https://github.com/cpfarhood/headlamp-rook-ceph-plugin/actions/workflows/ci.yaml)
+[![CI](https://github.com/cpfarhood/headlamp-rook-plugin/actions/workflows/ci.yaml/badge.svg)](https://github.com/cpfarhood/headlamp-rook-plugin/actions/workflows/ci.yaml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A [Headlamp](https://headlamp.dev/) plugin that surfaces [Rook-Ceph](https://rook.io/) cluster health, storage resources, and CSI driver status directly in the Headlamp UI.
@@ -53,16 +53,16 @@ Download the latest release tarball and place it in your Headlamp plugins direct
 
 ```bash
 # Download the latest release
-curl -L https://github.com/cpfarhood/headlamp-rook-ceph-plugin/releases/latest/download/headlamp-rook-ceph-plugin-<version>.tar.gz \
-  -o headlamp-rook-ceph-plugin.tar.gz
+curl -L https://github.com/cpfarhood/headlamp-rook-plugin/releases/latest/download/headlamp-rook-plugin-<version>.tar.gz \
+  -o headlamp-rook-plugin.tar.gz
 
 # Extract to Headlamp plugins directory
-tar -xzf headlamp-rook-ceph-plugin.tar.gz -C ~/.config/Headlamp/plugins/
+tar -xzf headlamp-rook-plugin.tar.gz -C ~/.config/Headlamp/plugins/
 ```
 
 ### Option 2: Headlamp In-App Plugin Manager
 
-Browse the Headlamp Plugin Manager (Settings → Plugins) and install **headlamp-rook-ceph-plugin** directly.
+Browse the Headlamp Plugin Manager (Settings → Plugins) and install **headlamp-rook-plugin** directly.
 
 ## RBAC & Security Setup
 
@@ -117,8 +117,8 @@ subjects:
 ### Setup
 
 ```bash
-git clone https://github.com/cpfarhood/headlamp-rook-ceph-plugin.git
-cd headlamp-rook-ceph-plugin
+git clone https://github.com/cpfarhood/headlamp-rook-plugin.git
+cd headlamp-rook-plugin
 npm install
 ```
 
