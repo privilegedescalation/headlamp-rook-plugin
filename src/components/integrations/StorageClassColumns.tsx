@@ -4,10 +4,14 @@
  * Adds Rook-Ceph-specific columns to the native Headlamp StorageClass table
  * ('headlamp-storageclasses') and PV table ('headlamp-persistentvolumes').
  * Non-Rook-Ceph rows show '—'.
+ *
+ * Column names (Protocol, Pool) are intentionally shared with the tns-csi
+ * column processor so both plugins contribute to the same logical columns
+ * on a mixed-driver cluster.
  */
 
 import React from 'react';
-import { formatStorageType, isRookCephProvisioner } from '../../api/k8s';
+import { isRookCephProvisioner } from '../../api/k8s';
 
 /** Safely read a nested field from either a KubeObject instance or plain object. */
 function getField(item: unknown, ...path: string[]): unknown {
@@ -36,23 +40,26 @@ function isRookPvRow(item: unknown): boolean {
   return typeof driver === 'string' && isRookCephProvisioner(driver);
 }
 
+function rookProtocol(s: string | undefined): string {
+  if (!s) return '—';
+  if (s.includes('.rbd.')) return 'RBD';
+  if (s.includes('.cephfs.')) return 'CephFS';
+  return '—';
+}
+
 export function buildStorageClassColumns() {
   return [
     {
-      label: 'Type',
+      label: 'Protocol',
       getValue: (item: unknown) => {
         if (!isRookRow(item)) return null;
         const provisioner = getField(item, 'provisioner') as string | undefined;
-        if (!provisioner) return null;
-        const type = provisioner.includes('.rbd.') ? 'rbd' : provisioner.includes('.cephfs.') ? 'cephfs' : 'unknown';
-        return formatStorageType(type as 'rbd' | 'cephfs' | 'unknown');
+        return rookProtocol(provisioner);
       },
       render: (item: unknown) => {
         if (!isRookRow(item)) return <span>—</span>;
         const provisioner = getField(item, 'provisioner') as string | undefined;
-        if (!provisioner) return <span>—</span>;
-        const type = provisioner.includes('.rbd.') ? 'rbd' : provisioner.includes('.cephfs.') ? 'cephfs' : 'unknown';
-        return <span style={{ color: '#1976d2', fontWeight: 500 }}>{formatStorageType(type as 'rbd' | 'cephfs' | 'unknown')}</span>;
+        return <span>{rookProtocol(provisioner)}</span>;
       },
     },
     {
@@ -71,7 +78,6 @@ export function buildStorageClassColumns() {
         if (!isRookRow(item)) return <span>—</span>;
         const clusterID = getField(item, 'parameters', 'clusterID') as string | undefined;
         if (!clusterID) return <span>—</span>;
-        // Truncate long cluster IDs
         return <span title={clusterID}>{clusterID.length > 16 ? `${clusterID.slice(0, 16)}…` : clusterID}</span>;
       },
     },
@@ -81,20 +87,16 @@ export function buildStorageClassColumns() {
 export function buildPVColumns() {
   return [
     {
-      label: 'Type',
+      label: 'Protocol',
       getValue: (item: unknown) => {
         if (!isRookPvRow(item)) return null;
         const driver = getField(item, 'spec', 'csi', 'driver') as string | undefined;
-        if (!driver) return null;
-        const type = driver.includes('.rbd.') ? 'rbd' : driver.includes('.cephfs.') ? 'cephfs' : 'unknown';
-        return formatStorageType(type as 'rbd' | 'cephfs' | 'unknown');
+        return rookProtocol(driver);
       },
       render: (item: unknown) => {
         if (!isRookPvRow(item)) return <span>—</span>;
         const driver = getField(item, 'spec', 'csi', 'driver') as string | undefined;
-        if (!driver) return <span>—</span>;
-        const type = driver.includes('.rbd.') ? 'rbd' : driver.includes('.cephfs.') ? 'cephfs' : 'unknown';
-        return <span style={{ color: '#1976d2', fontWeight: 500 }}>{formatStorageType(type as 'rbd' | 'cephfs' | 'unknown')}</span>;
+        return <span>{rookProtocol(driver)}</span>;
       },
     },
     {
