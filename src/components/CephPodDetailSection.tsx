@@ -11,7 +11,7 @@ import {
   StatusLabel,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React from 'react';
-import { formatAge, getPodRestarts } from '../api/k8s';
+import { formatAge } from '../api/k8s';
 
 interface CephPodDetailSectionProps {
   resource: {
