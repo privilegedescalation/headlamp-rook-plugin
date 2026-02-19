@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-02-19
+
+### Fixed
+
+- **Protocol column** — renamed `Type` → `Protocol` with short values (`RBD`, `CephFS`) to match tns-csi column naming convention on shared native tables
+
+## [0.1.2] - 2026-02-19
+
+### Fixed
+
+- **Column naming** — renamed `Rook Type` → `Type` and `Cluster ID` → `Cluster` in StorageClass and PV column processors
+
+## [0.1.1] - 2026-02-19
+
+### Fixed
+
+- **StorageClass/PV column injection** — removed redundant `Rook Type` label prefix; standardized column headers across plugins
+
 ## [0.1.0] - 2026-02-18
 
 ### Added
@@ -32,5 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript strict mode with zero `any` types
 - ESLint + Prettier code quality tooling
 
-[Unreleased]: https://github.com/cpfarhood/headlamp-rook-ceph-plugin/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/cpfarhood/headlamp-rook-ceph-plugin/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/cpfarhood/headlamp-rook-ceph-plugin/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/cpfarhood/headlamp-rook-ceph-plugin/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/cpfarhood/headlamp-rook-ceph-plugin/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/cpfarhood/headlamp-rook-ceph-plugin/releases/tag/v0.1.0
