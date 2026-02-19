@@ -1,4 +1,4 @@
-version: "0.1.1"
+version: "0.1.2"
 name: headlamp-rook-ceph-plugin
 displayName: Rook-Ceph Plugin
 createdAt: "2026-02-18T00:00:00Z"
@@ -23,7 +23,7 @@ maintainers:
 provider:
   name: privilegedescalation
 annotations:
-  headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-ceph-plugin/releases/download/v0.1.1/headlamp-rook-ceph-plugin-0.1.1.tar.gz"
-  headlamp/plugin/archive-checksum: "sha256:642863314b0879233b0341341c59a1d7b979b1668585c3dda1ab54e21e0136a0"
+  headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-ceph-plugin/releases/download/v0.1.2/headlamp-rook-ceph-plugin-0.1.2.tar.gz"
+  headlamp/plugin/archive-checksum: "sha256:c74aef8dd3e67b66bd20ce4845d324ee351b3bb560b43a4a5fff26f31b3d73e1"
   headlamp/plugin/distro-compat: ""
   headlamp/plugin/version-compat: ">=0.20"
