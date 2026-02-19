@@ -11,8 +11,8 @@ import {
   StatusLabel,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React, { useState } from 'react';
-import { useRookCephContext } from '../api/RookCephDataContext';
 import { CephBlockPool, formatAge, phaseToStatus } from '../api/k8s';
+import { useRookCephContext } from '../api/RookCephDataContext';
 
 function BlockPoolDetail({ pool, onClose }: { pool: CephBlockPool; onClose: () => void }) {
   return (

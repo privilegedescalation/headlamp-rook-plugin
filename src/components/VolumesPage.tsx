@@ -11,8 +11,8 @@ import {
   StatusLabel,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React, { useState } from 'react';
-import { useRookCephContext } from '../api/RookCephDataContext';
 import { formatAccessModes, formatAge, phaseToStatus, RookCephPersistentVolume } from '../api/k8s';
+import { useRookCephContext } from '../api/RookCephDataContext';
 
 function PVDetail({ pv, onClose }: { pv: RookCephPersistentVolume; onClose: () => void }) {
   const attrs = pv.spec.csi?.volumeAttributes ?? {};

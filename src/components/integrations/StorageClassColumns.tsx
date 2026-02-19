@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { isRookCephProvisioner, formatStorageType } from '../../api/k8s';
+import { formatStorageType, isRookCephProvisioner } from '../../api/k8s';
 
 /** Safely read a nested field from either a KubeObject instance or plain object. */
 function getField(item: unknown, ...path: string[]): unknown {

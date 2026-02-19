@@ -11,8 +11,8 @@ import {
   StatusLabel,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React from 'react';
-import { useRookCephContext } from '../api/RookCephDataContext';
 import { formatAge, getPodRestarts, isPodReady, RookCephPod } from '../api/k8s';
+import { useRookCephContext } from '../api/RookCephDataContext';
 
 function PodTable({ pods, title }: { pods: RookCephPod[]; title: string }) {
   if (pods.length === 0) return null;

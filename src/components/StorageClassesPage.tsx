@@ -11,8 +11,8 @@ import {
   StatusLabel,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React, { useState } from 'react';
-import { useRookCephContext } from '../api/RookCephDataContext';
 import { formatAge, formatStorageType, RookCephStorageClass, storageClassType } from '../api/k8s';
+import { useRookCephContext } from '../api/RookCephDataContext';
 
 function StorageClassDetail({ sc, pvCount, onClose }: { sc: RookCephStorageClass; pvCount: number; onClose: () => void }) {
   const type = storageClassType(sc);

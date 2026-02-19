@@ -10,8 +10,8 @@ import {
   SectionBox,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React from 'react';
+import { findBoundPv, formatStorageType } from '../api/k8s';
 import { useRookCephContext } from '../api/RookCephDataContext';
-import { findBoundPv, formatStorageType, storageClassType } from '../api/k8s';
 
 interface PVCDetailSectionProps {
   resource: {
