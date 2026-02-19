@@ -39,7 +39,7 @@ function isRookPvRow(item: unknown): boolean {
 export function buildStorageClassColumns() {
   return [
     {
-      label: 'Rook Type',
+      label: 'Type',
       getValue: (item: unknown) => {
         if (!isRookRow(item)) return null;
         const provisioner = getField(item, 'provisioner') as string | undefined;
@@ -65,7 +65,7 @@ export function buildStorageClassColumns() {
       },
     },
     {
-      label: 'Cluster ID',
+      label: 'Cluster',
       getValue: (item: unknown) => getField(item, 'parameters', 'clusterID') as string | null ?? null,
       render: (item: unknown) => {
         if (!isRookRow(item)) return <span>—</span>;
@@ -81,7 +81,7 @@ export function buildStorageClassColumns() {
 export function buildPVColumns() {
   return [
     {
-      label: 'Rook Type',
+      label: 'Type',
       getValue: (item: unknown) => {
         if (!isRookPvRow(item)) return null;
         const driver = getField(item, 'spec', 'csi', 'driver') as string | undefined;
