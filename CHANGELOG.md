@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-02-19
+
+### Fixed
+
+- **Duplicate columns** — Protocol and Pool columns on mixed-driver clusters (rook-ceph + tns-csi) are now merged into a single shared column rather than duplicated; whichever plugin loads first owns the column and the second merges into it
+
+### Changed
+
+- **Sidebar label** — top-level navigation entry renamed from `Rook-Ceph` to `Rook`
+
 ## [0.2.0] - 2026-02-19
 
 ### Changed
@@ -56,7 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript strict mode with zero `any` types
 - ESLint + Prettier code quality tooling
 
-[Unreleased]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.1.3...v0.2.0
 [0.1.3]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.1.1...v0.1.2
