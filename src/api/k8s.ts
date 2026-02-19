@@ -39,8 +39,8 @@ export const ROOK_OSD_SELECTOR = 'app=rook-ceph-osd';
 export const ROOK_MGR_SELECTOR = 'app=rook-ceph-mgr';
 export const ROOK_MDS_SELECTOR = 'app=rook-ceph-mds';
 export const ROOK_RGW_SELECTOR = 'app=rook-ceph-rgw';
-export const ROOK_CSI_RBD_SELECTOR = 'app=csi-rbdplugin-provisioner';
-export const ROOK_CSI_CEPHFS_SELECTOR = 'app=csi-cephfsplugin-provisioner';
+export const ROOK_CSI_RBD_SELECTOR = 'app=rook-ceph.rbd.csi.ceph.com-ctrlplugin';
+export const ROOK_CSI_CEPHFS_SELECTOR = 'app=rook-ceph.cephfs.csi.ceph.com-ctrlplugin';
 
 // ---------------------------------------------------------------------------
 // Generic Kubernetes object base shapes

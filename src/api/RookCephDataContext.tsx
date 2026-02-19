@@ -18,16 +18,16 @@ import {
   filterRookCephStorageClasses,
   isKubeList,
   ROOK_CEPH_NAMESPACE,
-  RookCephPersistentVolume,
-  RookCephPVC,
-  RookCephPod,
-  RookCephStorageClass,
   ROOK_CSI_CEPHFS_SELECTOR,
   ROOK_CSI_RBD_SELECTOR,
   ROOK_MGR_SELECTOR,
   ROOK_MON_SELECTOR,
-  ROOK_OSD_SELECTOR,
   ROOK_OPERATOR_SELECTOR,
+  ROOK_OSD_SELECTOR,
+  RookCephPersistentVolume,
+  RookCephPod,
+  RookCephPVC,
+  RookCephStorageClass,
 } from './k8s';
 
 // ---------------------------------------------------------------------------
