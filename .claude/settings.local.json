@@ -1,0 +1,7 @@
+{
+  "enabledMcpjsonServers": [
+    "kubernetes",
+    "flux",
+    "playwright"
+  ]
+}
