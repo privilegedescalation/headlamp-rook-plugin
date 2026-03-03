@@ -1,8 +1,15 @@
 {
   "mcpServers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
     "kubernetes": {
       "type": "sse",
-      "url": "http:/localhost:8080/sse"
+      "url": "http://localhost:8080/sse"
     },
     "flux": {
       "type": "sse",
@@ -10,7 +17,7 @@
     },
     "playwright": {
       "type": "sse",
-      "url": "http://playwright-mcp.playwright.svc.cluster.local:3000/sse"
-    } 
+      "url": "http://localhost:8086/sse"
+    }
   }
 }

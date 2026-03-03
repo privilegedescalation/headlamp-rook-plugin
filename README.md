@@ -1,5 +1,6 @@
 # Headlamp Rook Plugin
 
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/package/headlamp/rook/headlamp-rook-plugin)](https://artifacthub.io/packages/headlamp/rook/headlamp-rook-plugin)
 [![CI](https://github.com/cpfarhood/headlamp-rook-plugin/actions/workflows/ci.yaml/badge.svg)](https://github.com/cpfarhood/headlamp-rook-plugin/actions/workflows/ci.yaml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -47,7 +48,11 @@ Rook-Ceph must be deployed in the `rook-ceph` namespace with standard labels. Th
 
 ## Installing
 
-### Option 1: Manual Plugin Install
+### Option 1: Headlamp Plugin Manager (Recommended)
+
+Browse the Headlamp Plugin Manager (Settings → Plugins → Catalog) and install **headlamp-rook-plugin** directly.
+
+### Option 2: Manual Plugin Install
 
 Download the latest release tarball and place it in your Headlamp plugins directory:
 
@@ -59,10 +64,6 @@ curl -L https://github.com/cpfarhood/headlamp-rook-plugin/releases/latest/downlo
 # Extract to Headlamp plugins directory
 tar -xzf headlamp-rook-plugin.tar.gz -C ~/.config/Headlamp/plugins/
 ```
-
-### Option 2: Headlamp In-App Plugin Manager
-
-Browse the Headlamp Plugin Manager (Settings → Plugins) and install **headlamp-rook-plugin** directly.
 
 ## RBAC & Security Setup
 
@@ -106,6 +107,16 @@ subjects:
     name: headlamp
     namespace: headlamp
 ```
+
+## Troubleshooting
+
+| Symptom | Likely Cause | Quick Fix |
+| ------- | ------------ | --------- |
+| **Plugin not in sidebar** | Plugin not installed or needs browser refresh | Hard refresh (Cmd+Shift+R / Ctrl+Shift+F5) |
+| **No CephCluster data** | CRDs not installed or RBAC insufficient | Verify `kubectl get cephclusters -n rook-ceph` works |
+| **Block Pools empty** | No CephBlockPool resources | Check `kubectl get cephblockpools -n rook-ceph` |
+| **App bar badge missing** | No CephCluster present | Verify rook-ceph is deployed with a CephCluster resource |
+| **StorageClass columns not showing** | Rook provisioner not matching | Verify SC provisioner ends in `.rbd.csi.ceph.com` or `.cephfs.csi.ceph.com` |
 
 ## Development
 

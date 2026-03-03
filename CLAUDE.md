@@ -43,6 +43,8 @@ src/
     ├── StorageClassesPage.tsx
     ├── VolumesPage.tsx
     ├── PodsPage.tsx
+    ├── FilesystemsPage.tsx
+    ├── ObjectStoresPage.tsx
     ├── ClusterStatusCard.tsx
     ├── AppBarClusterBadge.tsx
     ├── PVCDetailSection.tsx            # Injected into Headlamp PVC detail view
