@@ -1,4 +1,4 @@
-version: "0.2.4"
+version: "0.2.5"
 name: headlamp-rook-plugin
 displayName: Rook Plugin
 createdAt: "2026-02-18T00:00:00Z"
@@ -27,7 +27,7 @@ changes:
     description: "Package renamed to rook so the plugin displays correctly in Headlamp's Plugins list"
 
 annotations:
-  headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-plugin/releases/download/v0.2.4/headlamp-rook-plugin-0.2.4.tar.gz"
-  headlamp/plugin/archive-checksum: sha256:0dd88eecd784bc70557bb4c7ce5eede50fe83944990bc881bbb17313588c79f2
+  headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-plugin/releases/download/v0.2.5/rook-0.2.5.tar.gz"
+  headlamp/plugin/archive-checksum: sha256:38ee58f83da386bc35a4d09c39883c2a2a29e89c4d239922dfa67dfcc10d9421
   headlamp/plugin/distro-compat: ""
   headlamp/plugin/version-compat: ">=0.20"
