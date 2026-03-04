@@ -52,8 +52,7 @@ jobs:
       - name: Update artifacthub-pkg.yml
         run: |
           VERSION="${{ inputs.version }}"
-          PKG_NAME=$(jq -r .name package.json)
-          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/${PKG_NAME}-${VERSION}.tar.gz"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/headlamp-rook-plugin-${VERSION}.tar.gz"
           sed -i "s/^version:.*/version: \"${VERSION}\"/" artifacthub-pkg.yml
           sed -i "s|headlamp/plugin/archive-url:.*|headlamp/plugin/archive-url: \"${RELEASE_URL}\"|" artifacthub-pkg.yml
 
@@ -69,11 +68,12 @@ jobs:
       - name: Prepare release tarball
         run: |
           VERSION="${{ inputs.version }}"
-          PKG_NAME=$(jq -r .name package.json)
-          TARBALL="${PKG_NAME}-${VERSION}.tar.gz"
-          mv *.tar.gz "$TARBALL"
+          TARBALL="headlamp-rook-plugin-${VERSION}.tar.gz"
+          GENERATED=$(ls *.tar.gz)
+          if [ "$GENERATED" != "$TARBALL" ]; then
+            mv "$GENERATED" "$TARBALL"
+          fi
           echo "TARBALL=$TARBALL" >> $GITHUB_ENV
-          echo "PKG_NAME=$PKG_NAME" >> $GITHUB_ENV
 
       - name: Validate tarball
         run: |
