@@ -97,10 +97,11 @@ jobs:
           git push origin main --tags
 
       - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ inputs.version }}"
+          files: ${{ env.TARBALL }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          VERSION="${{ inputs.version }}"
-          gh release create "v${VERSION}" "${{ env.TARBALL }}" \
-            --title "v${VERSION}" \
-            --generate-notes
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
