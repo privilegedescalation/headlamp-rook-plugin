@@ -35,6 +35,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
@@ -50,12 +56,6 @@ jobs:
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/${PKG_NAME}-${VERSION}.tar.gz"
           sed -i "s/^version:.*/version: \"${VERSION}\"/" artifacthub-pkg.yml
           sed -i "s|headlamp/plugin/archive-url:.*|headlamp/plugin/archive-url: \"${RELEASE_URL}\"|" artifacthub-pkg.yml
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
