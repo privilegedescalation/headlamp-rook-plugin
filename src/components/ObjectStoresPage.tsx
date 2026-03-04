@@ -15,12 +15,16 @@ import { CephObjectStore, formatAge, phaseToStatus } from '../api/k8s';
 import { useRookCephContext } from '../api/RookCephDataContext';
 
 function ObjectStoreDetail({ store, onClose }: { store: CephObjectStore; onClose: () => void }) {
-  const endpoints = (store.status as unknown as Record<string, unknown>)?.endpoints as
-    | { insecure?: string[]; secure?: string[] }
-    | undefined;
+  const endpoints = store.status?.endpoints;
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title-objectstore"
+      onKeyDown={e => {
+        if (e.key === 'Escape') onClose();
+      }}
       style={{
         position: 'fixed',
         top: 0,
@@ -42,7 +46,7 @@ function ObjectStoreDetail({ store, onClose }: { store: CephObjectStore; onClose
           marginBottom: '16px',
         }}
       >
-        <strong>{store.metadata.name}</strong>
+        <strong id="drawer-title-objectstore">{store.metadata.name}</strong>
         <button
           onClick={onClose}
           aria-label="Close"

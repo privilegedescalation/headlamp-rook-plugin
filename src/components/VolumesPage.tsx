@@ -18,6 +18,12 @@ function PVDetail({ pv, onClose }: { pv: RookCephPersistentVolume; onClose: () =
   const attrs = pv.spec.csi?.volumeAttributes ?? {};
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title-pv"
+      onKeyDown={e => {
+        if (e.key === 'Escape') onClose();
+      }}
       style={{
         position: 'fixed',
         top: 0,
@@ -39,7 +45,7 @@ function PVDetail({ pv, onClose }: { pv: RookCephPersistentVolume; onClose: () =
           marginBottom: '16px',
         }}
       >
-        <strong>{pv.metadata.name}</strong>
+        <strong id="drawer-title-pv">{pv.metadata.name}</strong>
         <button
           onClick={onClose}
           aria-label="Close"

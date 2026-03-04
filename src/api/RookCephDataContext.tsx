@@ -17,6 +17,8 @@ import {
   filterRookCephPVCs,
   filterRookCephStorageClasses,
   isKubeList,
+  ROOK_CEPH_API_GROUP,
+  ROOK_CEPH_API_VERSION,
   ROOK_CEPH_NAMESPACE,
   ROOK_CSI_CEPHFS_SELECTOR,
   ROOK_CSI_RBD_SELECTOR,
@@ -80,6 +82,19 @@ export function useRookCephContext(): RookCephContextValue {
 }
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Unwrap Headlamp KubeObject class instances to their raw `.jsonData`. */
+function extractJsonData(items: unknown[]): unknown[] {
+  return items.map(item =>
+    item && typeof item === 'object' && 'jsonData' in item
+      ? (item as { jsonData: unknown }).jsonData
+      : item
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
 
@@ -118,7 +133,7 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
         // CephCluster CRDs
         try {
           const clusterList = await ApiProxy.request(
-            `/apis/ceph.rook.io/v1/namespaces/${ROOK_CEPH_NAMESPACE}/cephclusters`
+            `/apis/${ROOK_CEPH_API_GROUP}/${ROOK_CEPH_API_VERSION}/namespaces/${ROOK_CEPH_NAMESPACE}/cephclusters`
           );
           if (!cancelled && isKubeList(clusterList)) {
             setCephClusters(clusterList.items as CephCluster[]);
@@ -130,7 +145,7 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
         // CephBlockPool CRDs
         try {
           const poolList = await ApiProxy.request(
-            `/apis/ceph.rook.io/v1/namespaces/${ROOK_CEPH_NAMESPACE}/cephblockpools`
+            `/apis/${ROOK_CEPH_API_GROUP}/${ROOK_CEPH_API_VERSION}/namespaces/${ROOK_CEPH_NAMESPACE}/cephblockpools`
           );
           if (!cancelled && isKubeList(poolList)) {
             setBlockPools(poolList.items as CephBlockPool[]);
@@ -142,7 +157,7 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
         // CephFilesystem CRDs
         try {
           const fsList = await ApiProxy.request(
-            `/apis/ceph.rook.io/v1/namespaces/${ROOK_CEPH_NAMESPACE}/cephfilesystems`
+            `/apis/${ROOK_CEPH_API_GROUP}/${ROOK_CEPH_API_VERSION}/namespaces/${ROOK_CEPH_NAMESPACE}/cephfilesystems`
           );
           if (!cancelled && isKubeList(fsList)) {
             setFilesystems(fsList.items as CephFilesystem[]);
@@ -154,7 +169,7 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
         // CephObjectStore CRDs
         try {
           const osList = await ApiProxy.request(
-            `/apis/ceph.rook.io/v1/namespaces/${ROOK_CEPH_NAMESPACE}/cephobjectstores`
+            `/apis/${ROOK_CEPH_API_GROUP}/${ROOK_CEPH_API_VERSION}/namespaces/${ROOK_CEPH_NAMESPACE}/cephobjectstores`
           );
           if (!cancelled && isKubeList(osList)) {
             setObjectStores(osList.items as CephObjectStore[]);
@@ -255,15 +270,7 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
   // Derived / filtered values — memoized to avoid recomputation on every render
   // ---------------------------------------------------------------------------
 
-  // Headlamp useList() returns KubeObject class instances that store raw
-  // Kubernetes JSON under `.jsonData`. Extract it so our plain-object helpers
-  // work correctly.
-  const extractJsonData = (items: unknown[]): unknown[] =>
-    items.map(item =>
-      item && typeof item === 'object' && 'jsonData' in item
-        ? (item as { jsonData: unknown }).jsonData
-        : item
-    );
+  // Uses module-level extractJsonData below
 
   const storageClasses = useMemo(() => {
     if (!allStorageClasses) return [];

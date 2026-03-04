@@ -17,6 +17,12 @@ import { useRookCephContext } from '../api/RookCephDataContext';
 function BlockPoolDetail({ pool, onClose }: { pool: CephBlockPool; onClose: () => void }) {
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title-blockpool"
+      onKeyDown={e => {
+        if (e.key === 'Escape') onClose();
+      }}
       style={{
         position: 'fixed',
         top: 0,
@@ -38,7 +44,7 @@ function BlockPoolDetail({ pool, onClose }: { pool: CephBlockPool; onClose: () =
           marginBottom: '16px',
         }}
       >
-        <strong>{pool.metadata.name}</strong>
+        <strong id="drawer-title-blockpool">{pool.metadata.name}</strong>
         <button
           onClick={onClose}
           aria-label="Close"

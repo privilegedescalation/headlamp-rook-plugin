@@ -26,6 +26,12 @@ function StorageClassDetail({
   const type = storageClassType(sc);
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title-storageclass"
+      onKeyDown={e => {
+        if (e.key === 'Escape') onClose();
+      }}
       style={{
         position: 'fixed',
         top: 0,
@@ -47,7 +53,7 @@ function StorageClassDetail({
           marginBottom: '16px',
         }}
       >
-        <strong>{sc.metadata.name}</strong>
+        <strong id="drawer-title-storageclass">{sc.metadata.name}</strong>
         <button
           onClick={onClose}
           aria-label="Close"

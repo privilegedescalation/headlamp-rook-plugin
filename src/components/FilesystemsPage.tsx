@@ -17,6 +17,12 @@ import { useRookCephContext } from '../api/RookCephDataContext';
 function FilesystemDetail({ fs, onClose }: { fs: CephFilesystem; onClose: () => void }) {
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title-filesystem"
+      onKeyDown={e => {
+        if (e.key === 'Escape') onClose();
+      }}
       style={{
         position: 'fixed',
         top: 0,
@@ -38,7 +44,7 @@ function FilesystemDetail({ fs, onClose }: { fs: CephFilesystem; onClose: () => 
           marginBottom: '16px',
         }}
       >
-        <strong>{fs.metadata.name}</strong>
+        <strong id="drawer-title-filesystem">{fs.metadata.name}</strong>
         <button
           onClick={onClose}
           aria-label="Close"

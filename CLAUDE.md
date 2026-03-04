@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Headlamp plugin for Rook-Ceph cluster visibility.
 
-- **Plugin name**: `headlamp-rook-plugin`
+- **Plugin name**: `rook`
 - **Rook-Ceph API group**: `ceph.rook.io/v1`
 - **Default namespace**: `rook-ceph`
 - **Reference plugin**: `../headlamp-tns-csi-plugin`
@@ -33,7 +33,7 @@ All tests and `tsc` must pass before committing.
 
 ```
 src/
-├── index.tsx                          # Plugin entry: registerRoute, registerSidebarEntry, etc.
+├── index.tsx                          # Plugin entry: registerRoute, registerSidebarEntry, registerAppBarAction, etc.
 ├── api/
 │   ├── k8s.ts                         # Types + filtering helpers (ceph.rook.io)
 │   └── RookCephDataContext.tsx         # Shared React context provider
@@ -46,7 +46,7 @@ src/
     ├── FilesystemsPage.tsx
     ├── ObjectStoresPage.tsx
     ├── ClusterStatusCard.tsx
-    ├── AppBarClusterBadge.tsx
+    ├── AppBarClusterBadge.tsx            # Cluster health badge in Headlamp top nav bar
     ├── PVCDetailSection.tsx            # Injected into Headlamp PVC detail view
     ├── PVDetailSection.tsx             # Injected into Headlamp PV detail view
     ├── CephPodDetailSection.tsx        # Injected into Headlamp Pod detail view
@@ -71,7 +71,9 @@ All pages consume data exclusively via `useRookCephContext()`. The provider is r
 - RBD provisioner: `rook-ceph.rbd.csi.ceph.com`
 - CephFS provisioner: `rook-ceph.cephfs.csi.ceph.com`
 - Custom namespace provisioners: any string ending in `.rbd.csi.ceph.com` or `.cephfs.csi.ceph.com`
-- Pod selectors: `app=rook-ceph-operator`, `app=rook-ceph-mon`, `app=rook-ceph-osd`, `app=rook-ceph-mgr`, `app=csi-rbdplugin-provisioner`, `app=csi-cephfsplugin-provisioner`
+- Pod selectors: `app=rook-ceph-operator`, `app=rook-ceph-mon`, `app=rook-ceph-osd`, `app=rook-ceph-mgr`, `app=rook-ceph-mds`, `app=rook-ceph-rgw`
+- CSI pod selectors (Rook 1.12+): `app=rook-ceph.rbd.csi.ceph.com-ctrlplugin`, `app=rook-ceph.cephfs.csi.ceph.com-ctrlplugin`
+- CSI pod selectors (legacy): `app=csi-rbdplugin-provisioner`, `app=csi-cephfsplugin-provisioner`, `app=csi-rbdplugin`, `app=csi-cephfsplugin`
 
 ## Code conventions
 

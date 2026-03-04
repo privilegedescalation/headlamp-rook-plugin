@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-03-04
+
+### Fixed
+
+- **AppBarClusterBadge registration** — cluster health badge in the Headlamp top nav bar was implemented but never registered; now wired up via `registerAppBarAction`
+- **CSI pod label mismatch** — `CephPodDetailSection` now recognizes both legacy (`csi-rbdplugin-provisioner`) and Rook 1.12+ (`rook-ceph.rbd.csi.ceph.com-ctrlplugin`) CSI pod labels
+- **Duplicate `parseStorageToBytes`** — removed local copy from `OverviewPage`; imports shared implementation from `k8s.ts`
+- **ObjectStore endpoint type safety** — added `endpoints` field to `CephObjectStoreStatus` interface, eliminating unsafe double-cast
+- **Redundant guard** — removed duplicate `storageClasses.length > 0` condition in `OverviewPage`
+
+### Added
+
+- **Sidebar entries** for Storage Classes and Volumes pages — both are now navigable from the sidebar instead of only accessible via direct URL
+- **Drawer accessibility** — all detail panel drawers now include `role="dialog"`, `aria-modal`, `aria-labelledby`, and Escape key handling
+
+### Changed
+
+- **Theme-aware colors** — replaced hardcoded hex colors with CSS custom properties (`var(--mui-palette-*)`) in `AppBarClusterBadge`, `ClusterStatusCard`, and `OverviewPage` for dark/light theme compatibility
+- **API URL constants** — `RookCephDataContext` now uses `ROOK_CEPH_API_GROUP` and `ROOK_CEPH_API_VERSION` constants instead of string literals
+- **`extractJsonData` hoisted** — moved from inside the component render body to module-level function
+
+### Removed
+
+- **Dead code** — removed unused `extractPoolFromVolumeHandle` function from `k8s.ts`
+
 ## [0.2.2] - 2026-02-19
 
 ### Changed
@@ -72,11 +97,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript strict mode with zero `any` types
 - ESLint + Prettier code quality tooling
 
-[Unreleased]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.2.2...HEAD
-[0.2.2]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.2.1...v0.2.2
-[0.2.1]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.1.3...v0.2.0
-[0.1.3]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.1.2...v0.1.3
-[0.1.2]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.1.1...v0.1.2
-[0.1.1]: https://github.com/cpfarhood/headlamp-rook-plugin/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/cpfarhood/headlamp-rook-plugin/releases/tag/v0.1.0
+[Unreleased]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.2.6...HEAD
+[0.2.6]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.2.5...v0.2.6
+[0.2.2]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.1.3...v0.2.0
+[0.1.3]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/privilegedescalation/headlamp-rook-plugin/releases/tag/v0.1.0

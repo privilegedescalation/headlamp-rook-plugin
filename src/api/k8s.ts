@@ -209,10 +209,16 @@ export interface CephObjectStoreSpec {
   gateway?: { port?: number; securePort?: number; instances?: number };
 }
 
+export interface CephObjectStoreEndpoints {
+  insecure?: string[];
+  secure?: string[];
+}
+
 export interface CephObjectStoreStatus {
   phase?: string;
   conditions?: CephClusterCondition[];
   info?: Record<string, string>;
+  endpoints?: CephObjectStoreEndpoints;
 }
 
 export interface CephObjectStore extends KubeObject {
@@ -462,12 +468,4 @@ export function formatStorageType(type: 'rbd' | 'cephfs' | 'unknown'): string {
     default:
       return 'Unknown';
   }
-}
-
-/** Extracts pool/subvolume group name from a Rook-Ceph PV volumeHandle. */
-export function extractPoolFromVolumeHandle(handle: string | undefined): string {
-  if (!handle) return '—';
-  // RBD format: "<csi-vol-id>-<pool>-..." — pool is in volumeAttributes
-  // We rely on volumeAttributes.pool instead; this just provides a fallback.
-  return handle;
 }

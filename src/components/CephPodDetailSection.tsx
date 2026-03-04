@@ -47,10 +47,14 @@ const ROOK_APP_LABELS = new Set([
   'rook-ceph-mgr',
   'rook-ceph-mds',
   'rook-ceph-rgw',
+  // Legacy CSI labels (pre-Rook 1.12)
   'csi-rbdplugin-provisioner',
   'csi-cephfsplugin-provisioner',
   'csi-rbdplugin',
   'csi-cephfsplugin',
+  // New CSI labels (Rook 1.12+)
+  'rook-ceph.rbd.csi.ceph.com-ctrlplugin',
+  'rook-ceph.cephfs.csi.ceph.com-ctrlplugin',
 ]);
 
 const ROLE_LABELS: Record<string, string> = {
@@ -64,6 +68,8 @@ const ROLE_LABELS: Record<string, string> = {
   'csi-cephfsplugin-provisioner': 'CSI CephFS Provisioner',
   'csi-rbdplugin': 'CSI RBD Node Plugin',
   'csi-cephfsplugin': 'CSI CephFS Node Plugin',
+  'rook-ceph.rbd.csi.ceph.com-ctrlplugin': 'CSI RBD Provisioner',
+  'rook-ceph.cephfs.csi.ceph.com-ctrlplugin': 'CSI CephFS Provisioner',
 };
 
 export default function CephPodDetailSection({ resource }: CephPodDetailSectionProps) {

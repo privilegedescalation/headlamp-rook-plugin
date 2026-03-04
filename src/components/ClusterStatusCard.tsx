@@ -110,9 +110,16 @@ export default function ClusterStatusCard({
                       {
                         name: 'Used',
                         value: bytesUsed,
-                        fill: usedPct > 80 ? '#f44336' : '#1976d2',
+                        fill:
+                          usedPct > 80
+                            ? 'var(--mui-palette-error-main, #f44336)'
+                            : 'var(--mui-palette-primary-main, #1976d2)',
                       },
-                      { name: 'Free', value: bytesAvail, fill: '#e0e0e0' },
+                      {
+                        name: 'Free',
+                        value: bytesAvail,
+                        fill: 'var(--mui-palette-action-disabledBackground, #e0e0e0)',
+                      },
                     ]}
                     total={bytesTotal}
                   />

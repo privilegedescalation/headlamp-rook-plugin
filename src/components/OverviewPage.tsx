@@ -19,6 +19,7 @@ import {
   formatAge,
   formatBytes,
   healthToStatus,
+  parseStorageToBytes,
   phaseToStatus,
   storageClassType,
 } from '../api/k8s';
@@ -162,36 +163,40 @@ export default function OverviewPage() {
       {/* Storage type distribution */}
       {storageClasses.length > 0 && (
         <SectionBox title="Storage Summary">
-          {storageClasses.length > 0 && (
-            <div style={{ marginBottom: '16px' }}>
-              <div
-                style={{
-                  marginBottom: '8px',
-                  fontSize: '14px',
-                  color: 'var(--mui-palette-text-secondary)',
-                }}
-              >
-                StorageClass Type Distribution
-              </div>
-              <PercentageBar
-                data={[
-                  ...(rbdClasses.length > 0
-                    ? [{ name: 'Block (RBD)', value: rbdClasses.length, fill: '#1976d2' }]
-                    : []),
-                  ...(cephfsClasses.length > 0
-                    ? [
-                        {
-                          name: 'Filesystem (CephFS)',
-                          value: cephfsClasses.length,
-                          fill: '#9c27b0',
-                        },
-                      ]
-                    : []),
-                ]}
-                total={storageClasses.length}
-              />
+          <div style={{ marginBottom: '16px' }}>
+            <div
+              style={{
+                marginBottom: '8px',
+                fontSize: '14px',
+                color: 'var(--mui-palette-text-secondary)',
+              }}
+            >
+              StorageClass Type Distribution
             </div>
-          )}
+            <PercentageBar
+              data={[
+                ...(rbdClasses.length > 0
+                  ? [
+                      {
+                        name: 'Block (RBD)',
+                        value: rbdClasses.length,
+                        fill: 'var(--mui-palette-primary-main, #1976d2)',
+                      },
+                    ]
+                  : []),
+                ...(cephfsClasses.length > 0
+                  ? [
+                      {
+                        name: 'Filesystem (CephFS)',
+                        value: cephfsClasses.length,
+                        fill: 'var(--mui-palette-secondary-main, #9c27b0)',
+                      },
+                    ]
+                  : []),
+              ]}
+              total={storageClasses.length}
+            />
+          </div>
           <NameValueTable
             rows={[
               {
@@ -333,25 +338,4 @@ export default function OverviewPage() {
       )}
     </>
   );
-}
-
-function parseStorageToBytes(storage: string): number {
-  const match = /^(\d+(?:\.\d+)?)\s*(Ki|Mi|Gi|Ti|Pi|K|M|G|T|P)?$/.exec(storage.trim());
-  if (!match) return 0;
-  const value = parseFloat(match[1]);
-  const suffix = match[2] ?? '';
-  const multipliers: Record<string, number> = {
-    '': 1,
-    K: 1e3,
-    Ki: 1024,
-    M: 1e6,
-    Mi: 1024 ** 2,
-    G: 1e9,
-    Gi: 1024 ** 3,
-    T: 1e12,
-    Ti: 1024 ** 4,
-    P: 1e15,
-    Pi: 1024 ** 5,
-  };
-  return value * (multipliers[suffix] ?? 1);
 }

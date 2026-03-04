@@ -6,6 +6,7 @@
  */
 
 import {
+  registerAppBarAction,
   registerDetailsViewSection,
   registerResourceTableColumnsProcessor,
   registerRoute,
@@ -13,6 +14,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib';
 import React from 'react';
 import { RookCephDataProvider } from './api/RookCephDataContext';
+import AppBarClusterBadge from './components/AppBarClusterBadge';
 import BlockPoolsPage from './components/BlockPoolsPage';
 import CephPodDetailSection from './components/CephPodDetailSection';
 import FilesystemsPage from './components/FilesystemsPage';
@@ -74,11 +76,37 @@ registerSidebarEntry({
 
 registerSidebarEntry({
   parent: 'rook-ceph',
+  name: 'rook-ceph-storage-classes',
+  label: 'Storage Classes',
+  url: '/rook-ceph/storage-classes',
+  icon: 'mdi:database-settings',
+});
+
+registerSidebarEntry({
+  parent: 'rook-ceph',
+  name: 'rook-ceph-volumes',
+  label: 'Volumes',
+  url: '/rook-ceph/volumes',
+  icon: 'mdi:harddisk',
+});
+
+registerSidebarEntry({
+  parent: 'rook-ceph',
   name: 'rook-ceph-pods',
   label: 'Pods',
   url: '/rook-ceph/pods',
   icon: 'mdi:cube-outline',
 });
+
+// ---------------------------------------------------------------------------
+// App bar action — cluster health badge
+// ---------------------------------------------------------------------------
+
+registerAppBarAction(() => (
+  <RookCephDataProvider>
+    <AppBarClusterBadge />
+  </RookCephDataProvider>
+));
 
 // ---------------------------------------------------------------------------
 // Routes
@@ -132,10 +160,9 @@ registerRoute({
   ),
 });
 
-// Storage Classes and Volumes pages accessible via direct URL
 registerRoute({
   path: '/rook-ceph/storage-classes',
-  sidebar: 'rook-ceph-overview',
+  sidebar: 'rook-ceph-storage-classes',
   name: 'rook-ceph-storage-classes',
   exact: true,
   component: () => (
@@ -147,7 +174,7 @@ registerRoute({
 
 registerRoute({
   path: '/rook-ceph/volumes',
-  sidebar: 'rook-ceph-overview',
+  sidebar: 'rook-ceph-volumes',
   name: 'rook-ceph-volumes',
   exact: true,
   component: () => (

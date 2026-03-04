@@ -15,13 +15,13 @@ import { useRookCephContext } from '../api/RookCephDataContext';
 function getHealthColor(health: string | undefined): string {
   switch (health) {
     case 'HEALTH_OK':
-      return '#4caf50';
+      return 'var(--mui-palette-success-main, #4caf50)';
     case 'HEALTH_WARN':
-      return '#ff9800';
+      return 'var(--mui-palette-warning-main, #ff9800)';
     case 'HEALTH_ERR':
-      return '#f44336';
+      return 'var(--mui-palette-error-main, #f44336)';
     default:
-      return '#9e9e9e';
+      return 'var(--mui-palette-action-disabled, #9e9e9e)';
   }
 }
 
