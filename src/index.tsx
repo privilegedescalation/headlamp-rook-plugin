@@ -16,7 +16,10 @@ import { RookCephDataProvider } from './api/RookCephDataContext';
 import BlockPoolsPage from './components/BlockPoolsPage';
 import CephPodDetailSection from './components/CephPodDetailSection';
 import FilesystemsPage from './components/FilesystemsPage';
-import { buildPVColumns, buildStorageClassColumns } from './components/integrations/StorageClassColumns';
+import {
+  buildPVColumns,
+  buildStorageClassColumns,
+} from './components/integrations/StorageClassColumns';
 import ObjectStoresPage from './components/ObjectStoresPage';
 import OverviewPage from './components/OverviewPage';
 import PodsPage from './components/PodsPage';
@@ -207,11 +210,18 @@ registerDetailsViewSection(({ resource }) => {
 // takes priority and falls back to the existing one (for mixed-driver tables).
 function mergeColumns<T>(
   existing: T[],
-  incoming: Array<{ label: string; getValue: (r: unknown) => unknown; render: (r: unknown) => React.ReactNode }>
+  incoming: Array<{
+    label: string;
+    getValue: (r: unknown) => unknown;
+    render: (r: unknown) => React.ReactNode;
+  }>
 ): T[] {
-  type ObjCol = { label: string; getValue: (r: unknown) => unknown; render: (r: unknown) => React.ReactNode };
-  const isObjCol = (c: unknown): c is ObjCol =>
-    typeof c === 'object' && c !== null && 'label' in c;
+  type ObjCol = {
+    label: string;
+    getValue: (r: unknown) => unknown;
+    render: (r: unknown) => React.ReactNode;
+  };
+  const isObjCol = (c: unknown): c is ObjCol => typeof c === 'object' && c !== null && 'label' in c;
   const result = [...existing];
   const toAppend: typeof incoming = [];
   for (const col of incoming) {
@@ -221,7 +231,7 @@ function mergeColumns<T>(
       result[idx] = {
         label: col.label,
         getValue: (r: unknown) => col.getValue(r) ?? prev.getValue(r),
-        render: (r: unknown) => col.getValue(r) !== null ? col.render(r) : prev.render(r),
+        render: (r: unknown) => (col.getValue(r) !== null ? col.render(r) : prev.render(r)),
       } as unknown as T;
     } else {
       toAppend.push(col);
@@ -239,4 +249,3 @@ registerResourceTableColumnsProcessor(({ id, columns }) => {
   }
   return columns;
 });
-

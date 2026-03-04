@@ -15,7 +15,13 @@ import {
   StatusLabel,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React from 'react';
-import { formatAge, formatBytes, healthToStatus, phaseToStatus, storageClassType } from '../api/k8s';
+import {
+  formatAge,
+  formatBytes,
+  healthToStatus,
+  phaseToStatus,
+  storageClassType,
+} from '../api/k8s';
 import { useRookCephContext } from '../api/RookCephDataContext';
 import ClusterStatusCard from './ClusterStatusCard';
 
@@ -70,7 +76,14 @@ export default function OverviewPage() {
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+        }}
+      >
         <SectionHeader title="Rook-Ceph — Overview" />
         <button
           onClick={refresh}
@@ -97,11 +110,16 @@ export default function OverviewPage() {
             rows={[
               {
                 name: 'Status',
-                value: <StatusLabel status="error">No CephCluster found in namespace rook-ceph</StatusLabel>,
+                value: (
+                  <StatusLabel status="error">
+                    No CephCluster found in namespace rook-ceph
+                  </StatusLabel>
+                ),
               },
               {
                 name: 'Install',
-                value: 'helm install rook-ceph rook-release/rook-ceph -n rook-ceph --create-namespace',
+                value:
+                  'helm install rook-ceph rook-release/rook-ceph -n rook-ceph --create-namespace',
               },
               {
                 name: 'Docs',
@@ -129,9 +147,7 @@ export default function OverviewPage() {
               {
                 name: 'Health',
                 value: (
-                  <StatusLabel status={healthToStatus(primaryHealth)}>
-                    {primaryHealth}
-                  </StatusLabel>
+                  <StatusLabel status={healthToStatus(primaryHealth)}>{primaryHealth}</StatusLabel>
                 ),
               },
               {
@@ -148,7 +164,13 @@ export default function OverviewPage() {
         <SectionBox title="Storage Summary">
           {storageClasses.length > 0 && (
             <div style={{ marginBottom: '16px' }}>
-              <div style={{ marginBottom: '8px', fontSize: '14px', color: 'var(--mui-palette-text-secondary)' }}>
+              <div
+                style={{
+                  marginBottom: '8px',
+                  fontSize: '14px',
+                  color: 'var(--mui-palette-text-secondary)',
+                }}
+              >
                 StorageClass Type Distribution
               </div>
               <PercentageBar
@@ -157,7 +179,13 @@ export default function OverviewPage() {
                     ? [{ name: 'Block (RBD)', value: rbdClasses.length, fill: '#1976d2' }]
                     : []),
                   ...(cephfsClasses.length > 0
-                    ? [{ name: 'Filesystem (CephFS)', value: cephfsClasses.length, fill: '#9c27b0' }]
+                    ? [
+                        {
+                          name: 'Filesystem (CephFS)',
+                          value: cephfsClasses.length,
+                          fill: '#9c27b0',
+                        },
+                      ]
                     : []),
                 ]}
                 total={storageClasses.length}
@@ -166,7 +194,10 @@ export default function OverviewPage() {
           )}
           <NameValueTable
             rows={[
-              { name: 'Storage Classes', value: `${storageClasses.length} (${rbdClasses.length} RBD, ${cephfsClasses.length} CephFS)` },
+              {
+                name: 'Storage Classes',
+                value: `${storageClasses.length} (${rbdClasses.length} RBD, ${cephfsClasses.length} CephFS)`,
+              },
               { name: 'Block Pools', value: String(blockPools.length) },
               { name: 'Filesystems', value: String(filesystems.length) },
               { name: 'Object Stores', value: String(objectStores.length) },
@@ -177,10 +208,20 @@ export default function OverviewPage() {
                 value: <StatusLabel status="success">{pvcStatusCounts.Bound}</StatusLabel>,
               },
               ...(pvcStatusCounts.Pending > 0
-                ? [{ name: 'PVCs (Pending)', value: <StatusLabel status="warning">{pvcStatusCounts.Pending}</StatusLabel> }]
+                ? [
+                    {
+                      name: 'PVCs (Pending)',
+                      value: <StatusLabel status="warning">{pvcStatusCounts.Pending}</StatusLabel>,
+                    },
+                  ]
                 : []),
               ...(pvcStatusCounts.Lost > 0
-                ? [{ name: 'PVCs (Lost)', value: <StatusLabel status="error">{pvcStatusCounts.Lost}</StatusLabel> }]
+                ? [
+                    {
+                      name: 'PVCs (Lost)',
+                      value: <StatusLabel status="error">{pvcStatusCounts.Lost}</StatusLabel>,
+                    },
+                  ]
                 : []),
             ]}
           />
@@ -203,18 +244,18 @@ export default function OverviewPage() {
         <SectionBox title="Block Pools">
           <SimpleTable
             columns={[
-              { label: 'Name', getter: (p) => p.metadata.name },
+              { label: 'Name', getter: p => p.metadata.name },
               {
                 label: 'Phase',
-                getter: (p) => (
+                getter: p => (
                   <StatusLabel status={phaseToStatus(p.status?.phase)}>
                     {p.status?.phase ?? 'Unknown'}
                   </StatusLabel>
                 ),
               },
-              { label: 'Replicas', getter: (p) => String(p.spec?.replicated?.size ?? '—') },
-              { label: 'Failure Domain', getter: (p) => p.spec?.failureDomain ?? '—' },
-              { label: 'Age', getter: (p) => formatAge(p.metadata.creationTimestamp) },
+              { label: 'Replicas', getter: p => String(p.spec?.replicated?.size ?? '—') },
+              { label: 'Failure Domain', getter: p => p.spec?.failureDomain ?? '—' },
+              { label: 'Age', getter: p => formatAge(p.metadata.creationTimestamp) },
             ]}
             data={blockPools}
           />
@@ -226,17 +267,20 @@ export default function OverviewPage() {
         <SectionBox title="Filesystems">
           <SimpleTable
             columns={[
-              { label: 'Name', getter: (f) => f.metadata.name },
+              { label: 'Name', getter: f => f.metadata.name },
               {
                 label: 'Phase',
-                getter: (f) => (
+                getter: f => (
                   <StatusLabel status={phaseToStatus(f.status?.phase)}>
                     {f.status?.phase ?? 'Unknown'}
                   </StatusLabel>
                 ),
               },
-              { label: 'Active MDS', getter: (f) => String(f.spec?.metadataServer?.activeCount ?? '—') },
-              { label: 'Age', getter: (f) => formatAge(f.metadata.creationTimestamp) },
+              {
+                label: 'Active MDS',
+                getter: f => String(f.spec?.metadataServer?.activeCount ?? '—'),
+              },
+              { label: 'Age', getter: f => formatAge(f.metadata.creationTimestamp) },
             ]}
             data={filesystems}
           />
@@ -248,18 +292,18 @@ export default function OverviewPage() {
         <SectionBox title="Object Stores">
           <SimpleTable
             columns={[
-              { label: 'Name', getter: (o) => o.metadata.name },
+              { label: 'Name', getter: o => o.metadata.name },
               {
                 label: 'Phase',
-                getter: (o) => (
+                getter: o => (
                   <StatusLabel status={phaseToStatus(o.status?.phase)}>
                     {o.status?.phase ?? 'Unknown'}
                   </StatusLabel>
                 ),
               },
-              { label: 'Gateway Port', getter: (o) => String(o.spec?.gateway?.port ?? '—') },
-              { label: 'Instances', getter: (o) => String(o.spec?.gateway?.instances ?? '—') },
-              { label: 'Age', getter: (o) => formatAge(o.metadata.creationTimestamp) },
+              { label: 'Gateway Port', getter: o => String(o.spec?.gateway?.port ?? '—') },
+              { label: 'Instances', getter: o => String(o.spec?.gateway?.instances ?? '—') },
+              { label: 'Age', getter: o => formatAge(o.metadata.creationTimestamp) },
             ]}
             data={objectStores}
           />
@@ -271,17 +315,17 @@ export default function OverviewPage() {
         <SectionBox title="Attention: Non-Bound PVCs">
           <SimpleTable
             columns={[
-              { label: 'Name', getter: (pvc) => pvc.metadata.name },
-              { label: 'Namespace', getter: (pvc) => pvc.metadata.namespace ?? '—' },
+              { label: 'Name', getter: pvc => pvc.metadata.name },
+              { label: 'Namespace', getter: pvc => pvc.metadata.namespace ?? '—' },
               {
                 label: 'Status',
-                getter: (pvc) => (
+                getter: pvc => (
                   <StatusLabel status={phaseToStatus(pvc.status?.phase)}>
                     {pvc.status?.phase ?? 'Unknown'}
                   </StatusLabel>
                 ),
               },
-              { label: 'Age', getter: (pvc) => formatAge(pvc.metadata.creationTimestamp) },
+              { label: 'Age', getter: pvc => formatAge(pvc.metadata.creationTimestamp) },
             ]}
             data={nonBoundPvcs}
           />
@@ -298,11 +342,16 @@ function parseStorageToBytes(storage: string): number {
   const suffix = match[2] ?? '';
   const multipliers: Record<string, number> = {
     '': 1,
-    K: 1e3, Ki: 1024,
-    M: 1e6, Mi: 1024 ** 2,
-    G: 1e9, Gi: 1024 ** 3,
-    T: 1e12, Ti: 1024 ** 4,
-    P: 1e15, Pi: 1024 ** 5,
+    K: 1e3,
+    Ki: 1024,
+    M: 1e6,
+    Mi: 1024 ** 2,
+    G: 1e9,
+    Gi: 1024 ** 3,
+    T: 1e12,
+    Ti: 1024 ** 4,
+    P: 1e15,
+    Pi: 1024 ** 5,
   };
   return value * (multipliers[suffix] ?? 1);
 }

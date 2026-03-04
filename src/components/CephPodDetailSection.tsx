@@ -80,16 +80,17 @@ export default function CephPodDetailSection({ resource }: CephPodDetailSectionP
   const role = ROLE_LABELS[appLabel] ?? appLabel;
   const phase = raw.status?.phase ?? 'Unknown';
   const isReady =
-    raw.status?.conditions?.some((c) => c.type === 'Ready' && c.status === 'True') ?? false;
-  const restarts =
-    raw.status?.containerStatuses?.reduce((s, c) => s + c.restartCount, 0) ?? 0;
+    raw.status?.conditions?.some(c => c.type === 'Ready' && c.status === 'True') ?? false;
+  const restarts = raw.status?.containerStatuses?.reduce((s, c) => s + c.restartCount, 0) ?? 0;
 
-  const containerRows = (raw.status?.containerStatuses ?? []).map((cs) => {
+  const containerRows = (raw.status?.containerStatuses ?? []).map(cs => {
     let stateStr = 'Unknown';
     if (cs.state?.running) stateStr = 'Running';
     else if (cs.state?.waiting) stateStr = `Waiting: ${cs.state.waiting.reason ?? ''}`;
     else if (cs.state?.terminated)
-      stateStr = `Terminated: ${cs.state.terminated.reason ?? ''} (exit ${cs.state.terminated.exitCode ?? ''})`;
+      stateStr = `Terminated: ${cs.state.terminated.reason ?? ''} (exit ${
+        cs.state.terminated.exitCode ?? ''
+      })`;
 
     return {
       name: cs.name,
@@ -111,11 +112,7 @@ export default function CephPodDetailSection({ resource }: CephPodDetailSectionP
           },
           {
             name: 'Phase',
-            value: (
-              <StatusLabel status={isReady ? 'success' : 'error'}>
-                {phase}
-              </StatusLabel>
-            ),
+            value: <StatusLabel status={isReady ? 'success' : 'error'}>{phase}</StatusLabel>,
           },
           { name: 'Node', value: raw.spec?.nodeName ?? '—' },
           { name: 'Restarts', value: String(restarts) },

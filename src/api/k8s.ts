@@ -129,9 +129,12 @@ export interface CephCluster extends KubeObject {
 
 export function healthToStatus(health: string | undefined): 'success' | 'warning' | 'error' {
   switch (health) {
-    case 'HEALTH_OK': return 'success';
-    case 'HEALTH_WARN': return 'warning';
-    default: return 'error';
+    case 'HEALTH_OK':
+      return 'success';
+    case 'HEALTH_WARN':
+      return 'warning';
+    default:
+      return 'error';
   }
 }
 
@@ -331,9 +334,7 @@ export function findBoundPv(
 ): RookCephPersistentVolume | undefined {
   const ns = pvc.metadata.namespace ?? '';
   const name = pvc.metadata.name;
-  return rookPvs.find(
-    pv => pv.spec.claimRef?.namespace === ns && pv.spec.claimRef?.name === name
-  );
+  return rookPvs.find(pv => pv.spec.claimRef?.namespace === ns && pv.spec.claimRef?.name === name);
 }
 
 // ---------------------------------------------------------------------------
@@ -368,15 +369,11 @@ export interface RookCephPod extends KubeObject {
 }
 
 export function isPodReady(pod: RookCephPod): boolean {
-  return (
-    pod.status?.conditions?.some(c => c.type === 'Ready' && c.status === 'True') ?? false
-  );
+  return pod.status?.conditions?.some(c => c.type === 'Ready' && c.status === 'True') ?? false;
 }
 
 export function getPodRestarts(pod: RookCephPod): number {
-  return (
-    pod.status?.containerStatuses?.reduce((sum, c) => sum + c.restartCount, 0) ?? 0
-  );
+  return pod.status?.containerStatuses?.reduce((sum, c) => sum + c.restartCount, 0) ?? 0;
 }
 
 export function getPodImage(pod: RookCephPod): string {
@@ -441,11 +438,16 @@ export function parseStorageToBytes(storage: string): number {
   const suffix = match[2] ?? '';
   const multipliers: Record<string, number> = {
     '': 1,
-    K: 1e3, Ki: 1024,
-    M: 1e6, Mi: 1024 ** 2,
-    G: 1e9, Gi: 1024 ** 3,
-    T: 1e12, Ti: 1024 ** 4,
-    P: 1e15, Pi: 1024 ** 5,
+    K: 1e3,
+    Ki: 1024,
+    M: 1e6,
+    Mi: 1024 ** 2,
+    G: 1e9,
+    Gi: 1024 ** 3,
+    T: 1e12,
+    Ti: 1024 ** 4,
+    P: 1e15,
+    Pi: 1024 ** 5,
   };
   return value * (multipliers[suffix] ?? 1);
 }
@@ -453,9 +455,12 @@ export function parseStorageToBytes(storage: string): number {
 /** Returns display label for storage type (rbd → Block, cephfs → Filesystem). */
 export function formatStorageType(type: 'rbd' | 'cephfs' | 'unknown'): string {
   switch (type) {
-    case 'rbd': return 'Block (RBD)';
-    case 'cephfs': return 'Filesystem (CephFS)';
-    default: return 'Unknown';
+    case 'rbd':
+      return 'Block (RBD)';
+    case 'cephfs':
+      return 'Filesystem (CephFS)';
+    default:
+      return 'Unknown';
   }
 }
 

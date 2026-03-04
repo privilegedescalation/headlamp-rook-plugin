@@ -20,18 +20,18 @@ function PodTable({ pods, title }: { pods: RookCephPod[]; title: string }) {
     <SectionBox title={`${title} (${pods.length})`}>
       <SimpleTable
         columns={[
-          { label: 'Name', getter: (p) => p.metadata.name },
+          { label: 'Name', getter: p => p.metadata.name },
           {
             label: 'Status',
-            getter: (p) => (
+            getter: p => (
               <StatusLabel status={isPodReady(p) ? 'success' : 'error'}>
                 {p.status?.phase ?? 'Unknown'}
               </StatusLabel>
             ),
           },
-          { label: 'Node', getter: (p) => p.spec?.nodeName ?? '—' },
-          { label: 'Restarts', getter: (p) => String(getPodRestarts(p)) },
-          { label: 'Age', getter: (p) => formatAge(p.metadata.creationTimestamp) },
+          { label: 'Node', getter: p => p.spec?.nodeName ?? '—' },
+          { label: 'Restarts', getter: p => String(getPodRestarts(p)) },
+          { label: 'Age', getter: p => formatAge(p.metadata.creationTimestamp) },
         ]}
         data={pods}
       />
@@ -45,27 +45,27 @@ function OsdTable({ pods }: { pods: RookCephPod[] }) {
     <SectionBox title={`OSDs (${pods.length})`}>
       <SimpleTable
         columns={[
-          { label: 'OSD ID', getter: (p) => p.metadata.labels?.['osd'] ?? p.metadata.name },
+          { label: 'OSD ID', getter: p => p.metadata.labels?.['osd'] ?? p.metadata.name },
           {
             label: 'Status',
-            getter: (p) => {
-              const st = isPodReady(p) ? 'success' : p.status?.phase === 'Pending' ? 'warning' : 'error';
-              return (
-                <StatusLabel status={st}>
-                  {p.status?.phase ?? 'Unknown'}
-                </StatusLabel>
-              );
+            getter: p => {
+              const st = isPodReady(p)
+                ? 'success'
+                : p.status?.phase === 'Pending'
+                ? 'warning'
+                : 'error';
+              return <StatusLabel status={st}>{p.status?.phase ?? 'Unknown'}</StatusLabel>;
             },
           },
           {
             label: 'Node',
-            getter: (p) => p.spec?.nodeName ?? p.metadata.labels?.['topology-location-host'] ?? '—',
+            getter: p => p.spec?.nodeName ?? p.metadata.labels?.['topology-location-host'] ?? '—',
           },
-          { label: 'Device Class', getter: (p) => p.metadata.labels?.['device-class'] ?? '—' },
-          { label: 'Store', getter: (p) => p.metadata.labels?.['osd-store'] ?? '—' },
-          { label: 'Failure Domain', getter: (p) => p.metadata.labels?.['failure-domain'] ?? '—' },
-          { label: 'Restarts', getter: (p) => String(getPodRestarts(p)) },
-          { label: 'Age', getter: (p) => formatAge(p.metadata.creationTimestamp) },
+          { label: 'Device Class', getter: p => p.metadata.labels?.['device-class'] ?? '—' },
+          { label: 'Store', getter: p => p.metadata.labels?.['osd-store'] ?? '—' },
+          { label: 'Failure Domain', getter: p => p.metadata.labels?.['failure-domain'] ?? '—' },
+          { label: 'Restarts', getter: p => String(getPodRestarts(p)) },
+          { label: 'Age', getter: p => formatAge(p.metadata.creationTimestamp) },
         ]}
         data={pods}
       />
@@ -74,20 +74,19 @@ function OsdTable({ pods }: { pods: RookCephPod[] }) {
 }
 
 export default function PodsPage() {
-  const {
-    operatorPods,
-    monPods,
-    osdPods,
-    mgrPods,
-    csiRbdPods,
-    csiCephfsPods,
-    loading,
-    error,
-  } = useRookCephContext();
+  const { operatorPods, monPods, osdPods, mgrPods, csiRbdPods, csiCephfsPods, loading, error } =
+    useRookCephContext();
 
   if (loading) return <Loader title="Loading Rook-Ceph pods..." />;
 
-  const allPods = [...operatorPods, ...monPods, ...osdPods, ...mgrPods, ...csiRbdPods, ...csiCephfsPods];
+  const allPods = [
+    ...operatorPods,
+    ...monPods,
+    ...osdPods,
+    ...mgrPods,
+    ...csiRbdPods,
+    ...csiCephfsPods,
+  ];
   const totalReady = allPods.filter(isPodReady).length;
 
   return (
@@ -96,7 +95,9 @@ export default function PodsPage() {
 
       {error && (
         <SectionBox title="Error">
-          <NameValueTable rows={[{ name: 'Status', value: <StatusLabel status="error">{error}</StatusLabel> }]} />
+          <NameValueTable
+            rows={[{ name: 'Status', value: <StatusLabel status="error">{error}</StatusLabel> }]}
+          />
         </SectionBox>
       )}
 
@@ -106,7 +107,11 @@ export default function PodsPage() {
             {
               name: 'Overall Health',
               value: (
-                <StatusLabel status={totalReady === allPods.length && allPods.length > 0 ? 'success' : 'warning'}>
+                <StatusLabel
+                  status={
+                    totalReady === allPods.length && allPods.length > 0 ? 'success' : 'warning'
+                  }
+                >
                   {totalReady}/{allPods.length} pods ready
                 </StatusLabel>
               ),

@@ -19,7 +19,10 @@ function FilesystemDetail({ fs, onClose }: { fs: CephFilesystem; onClose: () => 
     <div
       style={{
         position: 'fixed',
-        top: 0, right: 0, bottom: 0, width: '480px',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: '480px',
         backgroundColor: 'var(--mui-palette-background-paper, #fff)',
         boxShadow: '-4px 0 16px rgba(0,0,0,0.15)',
         zIndex: 1300,
@@ -27,7 +30,14 @@ function FilesystemDetail({ fs, onClose }: { fs: CephFilesystem; onClose: () => 
         padding: '24px',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '16px',
+        }}
+      >
         <strong>{fs.metadata.name}</strong>
         <button
           onClick={onClose}
@@ -58,7 +68,10 @@ function FilesystemDetail({ fs, onClose }: { fs: CephFilesystem; onClose: () => 
         <NameValueTable
           rows={[
             { name: 'Active Count', value: String(fs.spec?.metadataServer?.activeCount ?? '—') },
-            { name: 'Active Standby', value: String(fs.spec?.metadataServer?.activeStandby ?? '—') },
+            {
+              name: 'Active Standby',
+              value: String(fs.spec?.metadataServer?.activeStandby ?? '—'),
+            },
           ]}
         />
       </SectionBox>
@@ -107,14 +120,21 @@ export default function FilesystemsPage() {
 
       {error && (
         <SectionBox title="Error">
-          <NameValueTable rows={[{ name: 'Status', value: <StatusLabel status="error">{error}</StatusLabel> }]} />
+          <NameValueTable
+            rows={[{ name: 'Status', value: <StatusLabel status="error">{error}</StatusLabel> }]}
+          />
         </SectionBox>
       )}
 
       {filesystems.length === 0 ? (
         <SectionBox title="No Filesystems">
           <NameValueTable
-            rows={[{ name: 'Status', value: 'No CephFilesystem resources found in rook-ceph namespace.' }]}
+            rows={[
+              {
+                name: 'Status',
+                value: 'No CephFilesystem resources found in rook-ceph namespace.',
+              },
+            ]}
           />
         </SectionBox>
       ) : (
@@ -126,7 +146,15 @@ export default function FilesystemsPage() {
                 getter: (f: CephFilesystem) => (
                   <button
                     onClick={() => setSelected(f)}
-                    style={{ border: 'none', background: 'transparent', color: 'var(--link-color, #1976d2)', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit' }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      color: 'var(--link-color, #1976d2)',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      padding: 0,
+                      font: 'inherit',
+                    }}
                   >
                     {f.metadata.name}
                   </button>
@@ -140,10 +168,22 @@ export default function FilesystemsPage() {
                   </StatusLabel>
                 ),
               },
-              { label: 'Active MDS', getter: (f: CephFilesystem) => String(f.spec?.metadataServer?.activeCount ?? '—') },
-              { label: 'Active Standby', getter: (f: CephFilesystem) => String(f.spec?.metadataServer?.activeStandby ?? '—') },
-              { label: 'Data Pools', getter: (f: CephFilesystem) => String(f.spec?.dataPools?.length ?? 0) },
-              { label: 'Age', getter: (f: CephFilesystem) => formatAge(f.metadata.creationTimestamp) },
+              {
+                label: 'Active MDS',
+                getter: (f: CephFilesystem) => String(f.spec?.metadataServer?.activeCount ?? '—'),
+              },
+              {
+                label: 'Active Standby',
+                getter: (f: CephFilesystem) => String(f.spec?.metadataServer?.activeStandby ?? '—'),
+              },
+              {
+                label: 'Data Pools',
+                getter: (f: CephFilesystem) => String(f.spec?.dataPools?.length ?? 0),
+              },
+              {
+                label: 'Age',
+                getter: (f: CephFilesystem) => formatAge(f.metadata.creationTimestamp),
+              },
             ]}
             data={filesystems}
           />
@@ -153,7 +193,12 @@ export default function FilesystemsPage() {
       {selected && (
         <>
           <div
-            style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 1299 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              zIndex: 1299,
+            }}
             onClick={() => setSelected(null)}
           />
           <FilesystemDetail fs={selected} onClose={() => setSelected(null)} />

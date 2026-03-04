@@ -4,17 +4,17 @@
  * Shown only when the PV uses a Rook-Ceph CSI driver.
  */
 
-import {
-  NameValueTable,
-  SectionBox,
-} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React from 'react';
 import { formatStorageType, isRookCephPersistentVolume } from '../api/k8s';
 
 interface PVDetailSectionProps {
   resource: {
     metadata?: { name?: string };
-    spec?: { csi?: { driver?: string; volumeHandle?: string; volumeAttributes?: Record<string, string> }; storageClassName?: string };
+    spec?: {
+      csi?: { driver?: string; volumeHandle?: string; volumeAttributes?: Record<string, string> };
+      storageClassName?: string;
+    };
     jsonData?: unknown;
   };
 }
@@ -34,7 +34,11 @@ export default function PVDetailSection({ resource }: PVDetailSectionProps) {
   }
 
   const attrs = spec?.csi?.volumeAttributes ?? {};
-  const type = driver.includes('.rbd.') ? 'rbd' : driver.includes('.cephfs.') ? 'cephfs' : 'unknown';
+  const type = driver.includes('.rbd.')
+    ? 'rbd'
+    : driver.includes('.cephfs.')
+    ? 'cephfs'
+    : 'unknown';
 
   return (
     <SectionBox title="Rook-Ceph Volume Details">

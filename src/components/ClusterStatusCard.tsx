@@ -11,7 +11,15 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React from 'react';
 import type { CephCluster, RookCephPod } from '../api/k8s';
-import { formatAge, formatBytes, getPodImage, getPodRestarts, healthToStatus, isPodReady, phaseToStatus } from '../api/k8s';
+import {
+  formatAge,
+  formatBytes,
+  getPodImage,
+  getPodRestarts,
+  healthToStatus,
+  isPodReady,
+  phaseToStatus,
+} from '../api/k8s';
 
 interface ClusterStatusCardProps {
   cephClusters: CephCluster[];
@@ -26,17 +34,14 @@ interface ClusterStatusCardProps {
 function PodStatusBadge({ pod }: { pod: RookCephPod }) {
   const ready = isPodReady(pod);
   const phase = pod.status?.phase ?? 'Unknown';
-  return (
-    <StatusLabel status={ready ? 'success' : 'error'}>
-      {phase}
-    </StatusLabel>
-  );
+  return <StatusLabel status={ready ? 'success' : 'error'}>{phase}</StatusLabel>;
 }
 
 function PodSummaryRow({ pods, label }: { pods: RookCephPod[]; label: string }) {
   const ready = pods.filter(isPodReady).length;
   const total = pods.length;
-  const status = total === 0 ? 'error' : ready === total ? 'success' : ready > 0 ? 'warning' : 'error';
+  const status =
+    total === 0 ? 'error' : ready === total ? 'success' : ready > 0 ? 'warning' : 'error';
   return {
     name: label,
     value: (
@@ -84,12 +89,12 @@ export default function ClusterStatusCard({
                   {
                     name: 'Phase',
                     value: (
-                      <StatusLabel status={phaseToStatus(phase)}>
-                        {phase ?? 'Unknown'}
-                      </StatusLabel>
+                      <StatusLabel status={phaseToStatus(phase)}>{phase ?? 'Unknown'}</StatusLabel>
                     ),
                   },
-                  ...(cluster.status?.message ? [{ name: 'Message', value: cluster.status.message }] : []),
+                  ...(cluster.status?.message
+                    ? [{ name: 'Message', value: cluster.status.message }]
+                    : []),
                   { name: 'Ceph Version', value: version },
                   { name: 'Namespace', value: cluster.metadata.namespace ?? '—' },
                   { name: 'Age', value: formatAge(cluster.metadata.creationTimestamp) },
@@ -102,7 +107,11 @@ export default function ClusterStatusCard({
                 <div style={{ marginBottom: '12px' }}>
                   <PercentageBar
                     data={[
-                      { name: 'Used', value: bytesUsed, fill: usedPct > 80 ? '#f44336' : '#1976d2' },
+                      {
+                        name: 'Used',
+                        value: bytesUsed,
+                        fill: usedPct > 80 ? '#f44336' : '#1976d2',
+                      },
                       { name: 'Free', value: bytesAvail, fill: '#e0e0e0' },
                     ]}
                     total={bytesTotal}
@@ -142,7 +151,9 @@ export function PodDetailRows({ pods, label }: { pods: RookCephPod[]; label: str
     return (
       <SectionBox title={label}>
         <NameValueTable
-          rows={[{ name: 'Status', value: <StatusLabel status="error">No pods found</StatusLabel> }]}
+          rows={[
+            { name: 'Status', value: <StatusLabel status="error">No pods found</StatusLabel> },
+          ]}
         />
       </SectionBox>
     );

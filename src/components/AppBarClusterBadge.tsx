@@ -14,10 +14,14 @@ import { useRookCephContext } from '../api/RookCephDataContext';
 
 function getHealthColor(health: string | undefined): string {
   switch (health) {
-    case 'HEALTH_OK': return '#4caf50';
-    case 'HEALTH_WARN': return '#ff9800';
-    case 'HEALTH_ERR': return '#f44336';
-    default: return '#9e9e9e';
+    case 'HEALTH_OK':
+      return '#4caf50';
+    case 'HEALTH_WARN':
+      return '#ff9800';
+    case 'HEALTH_ERR':
+      return '#f44336';
+    default:
+      return '#9e9e9e';
   }
 }
 

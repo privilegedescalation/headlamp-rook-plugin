@@ -166,7 +166,9 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
         // Operator pods
         try {
           const opList = await ApiProxy.request(
-            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(ROOK_OPERATOR_SELECTOR)}`
+            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(
+              ROOK_OPERATOR_SELECTOR
+            )}`
           );
           if (!cancelled && isKubeList(opList)) setOperatorPods(opList.items as RookCephPod[]);
         } catch {
@@ -176,7 +178,9 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
         // MON pods
         try {
           const monList = await ApiProxy.request(
-            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(ROOK_MON_SELECTOR)}`
+            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(
+              ROOK_MON_SELECTOR
+            )}`
           );
           if (!cancelled && isKubeList(monList)) setMonPods(monList.items as RookCephPod[]);
         } catch {
@@ -186,7 +190,9 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
         // OSD pods
         try {
           const osdList = await ApiProxy.request(
-            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(ROOK_OSD_SELECTOR)}`
+            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(
+              ROOK_OSD_SELECTOR
+            )}`
           );
           if (!cancelled && isKubeList(osdList)) setOsdPods(osdList.items as RookCephPod[]);
         } catch {
@@ -196,7 +202,9 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
         // MGR pods
         try {
           const mgrList = await ApiProxy.request(
-            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(ROOK_MGR_SELECTOR)}`
+            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(
+              ROOK_MGR_SELECTOR
+            )}`
           );
           if (!cancelled && isKubeList(mgrList)) setMgrPods(mgrList.items as RookCephPod[]);
         } catch {
@@ -206,9 +214,12 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
         // CSI RBD provisioner pods
         try {
           const csiRbdList = await ApiProxy.request(
-            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(ROOK_CSI_RBD_SELECTOR)}`
+            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(
+              ROOK_CSI_RBD_SELECTOR
+            )}`
           );
-          if (!cancelled && isKubeList(csiRbdList)) setCsiRbdPods(csiRbdList.items as RookCephPod[]);
+          if (!cancelled && isKubeList(csiRbdList))
+            setCsiRbdPods(csiRbdList.items as RookCephPod[]);
         } catch {
           if (!cancelled) setCsiRbdPods([]);
         }
@@ -216,9 +227,12 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
         // CSI CephFS provisioner pods
         try {
           const csiCephfsList = await ApiProxy.request(
-            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(ROOK_CSI_CEPHFS_SELECTOR)}`
+            `/api/v1/namespaces/${ROOK_CEPH_NAMESPACE}/pods?labelSelector=${encodeURIComponent(
+              ROOK_CSI_CEPHFS_SELECTOR
+            )}`
           );
-          if (!cancelled && isKubeList(csiCephfsList)) setCsiCephfsPods(csiCephfsList.items as RookCephPod[]);
+          if (!cancelled && isKubeList(csiCephfsList))
+            setCsiCephfsPods(csiCephfsList.items as RookCephPod[]);
         } catch {
           if (!cancelled) setCsiCephfsPods([]);
         }
@@ -232,7 +246,9 @@ export function RookCephDataProvider({ children }: { children: React.ReactNode }
     }
 
     void fetchAsync();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [refreshKey]);
 
   // ---------------------------------------------------------------------------

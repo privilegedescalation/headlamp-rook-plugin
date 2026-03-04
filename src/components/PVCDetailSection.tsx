@@ -5,10 +5,7 @@
  * Uses registerDetailsViewSection in index.tsx.
  */
 
-import {
-  NameValueTable,
-  SectionBox,
-} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React from 'react';
 import { findBoundPv, formatStorageType } from '../api/k8s';
 import { useRookCephContext } from '../api/RookCephDataContext';
@@ -40,7 +37,11 @@ export default function PVCDetailSection({ resource }: PVCDetailSectionProps) {
 
   // Determine storage type from driver name
   const driver = boundPv.spec.csi?.driver ?? '';
-  const type = driver.includes('.rbd.') ? 'rbd' : driver.includes('.cephfs.') ? 'cephfs' : 'unknown';
+  const type = driver.includes('.rbd.')
+    ? 'rbd'
+    : driver.includes('.cephfs.')
+    ? 'cephfs'
+    : 'unknown';
 
   return (
     <SectionBox title="Rook-Ceph Storage Details">

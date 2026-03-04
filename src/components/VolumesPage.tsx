@@ -20,7 +20,10 @@ function PVDetail({ pv, onClose }: { pv: RookCephPersistentVolume; onClose: () =
     <div
       style={{
         position: 'fixed',
-        top: 0, right: 0, bottom: 0, width: '520px',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: '520px',
         backgroundColor: 'var(--mui-palette-background-paper, #fff)',
         boxShadow: '-4px 0 16px rgba(0,0,0,0.15)',
         zIndex: 1300,
@@ -28,7 +31,14 @@ function PVDetail({ pv, onClose }: { pv: RookCephPersistentVolume; onClose: () =
         padding: '24px',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '16px',
+        }}
+      >
         <strong>{pv.metadata.name}</strong>
         <button
           onClick={onClose}
@@ -89,7 +99,9 @@ export default function VolumesPage() {
 
       {error && (
         <SectionBox title="Error">
-          <NameValueTable rows={[{ name: 'Status', value: <StatusLabel status="error">{error}</StatusLabel> }]} />
+          <NameValueTable
+            rows={[{ name: 'Status', value: <StatusLabel status="error">{error}</StatusLabel> }]}
+          />
         </SectionBox>
       )}
 
@@ -108,14 +120,28 @@ export default function VolumesPage() {
                 getter: (pv: RookCephPersistentVolume) => (
                   <button
                     onClick={() => setSelected(pv)}
-                    style={{ border: 'none', background: 'transparent', color: 'var(--link-color, #1976d2)', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit' }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      color: 'var(--link-color, #1976d2)',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      padding: 0,
+                      font: 'inherit',
+                    }}
                   >
                     {pv.metadata.name}
                   </button>
                 ),
               },
-              { label: 'Capacity', getter: (pv: RookCephPersistentVolume) => pv.spec.capacity?.storage ?? '—' },
-              { label: 'Access Modes', getter: (pv: RookCephPersistentVolume) => formatAccessModes(pv.spec.accessModes) },
+              {
+                label: 'Capacity',
+                getter: (pv: RookCephPersistentVolume) => pv.spec.capacity?.storage ?? '—',
+              },
+              {
+                label: 'Access Modes',
+                getter: (pv: RookCephPersistentVolume) => formatAccessModes(pv.spec.accessModes),
+              },
               {
                 label: 'Phase',
                 getter: (pv: RookCephPersistentVolume) => (
@@ -124,10 +150,25 @@ export default function VolumesPage() {
                   </StatusLabel>
                 ),
               },
-              { label: 'Reclaim', getter: (pv: RookCephPersistentVolume) => pv.spec.persistentVolumeReclaimPolicy ?? '—' },
-              { label: 'Pool', getter: (pv: RookCephPersistentVolume) => pv.spec.csi?.volumeAttributes?.['pool'] ?? '—' },
-              { label: 'Claim', getter: (pv: RookCephPersistentVolume) => pv.spec.claimRef ? `${pv.spec.claimRef.namespace}/${pv.spec.claimRef.name}` : '—' },
-              { label: 'Age', getter: (pv: RookCephPersistentVolume) => formatAge(pv.metadata.creationTimestamp) },
+              {
+                label: 'Reclaim',
+                getter: (pv: RookCephPersistentVolume) =>
+                  pv.spec.persistentVolumeReclaimPolicy ?? '—',
+              },
+              {
+                label: 'Pool',
+                getter: (pv: RookCephPersistentVolume) =>
+                  pv.spec.csi?.volumeAttributes?.['pool'] ?? '—',
+              },
+              {
+                label: 'Claim',
+                getter: (pv: RookCephPersistentVolume) =>
+                  pv.spec.claimRef ? `${pv.spec.claimRef.namespace}/${pv.spec.claimRef.name}` : '—',
+              },
+              {
+                label: 'Age',
+                getter: (pv: RookCephPersistentVolume) => formatAge(pv.metadata.creationTimestamp),
+              },
             ]}
             data={persistentVolumes}
           />
@@ -137,7 +178,12 @@ export default function VolumesPage() {
       {selected && (
         <>
           <div
-            style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 1299 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              zIndex: 1299,
+            }}
             onClick={() => setSelected(null)}
           />
           <PVDetail pv={selected} onClose={() => setSelected(null)} />

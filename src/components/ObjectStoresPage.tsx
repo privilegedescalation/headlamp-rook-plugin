@@ -23,7 +23,10 @@ function ObjectStoreDetail({ store, onClose }: { store: CephObjectStore; onClose
     <div
       style={{
         position: 'fixed',
-        top: 0, right: 0, bottom: 0, width: '480px',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: '480px',
         backgroundColor: 'var(--mui-palette-background-paper, #fff)',
         boxShadow: '-4px 0 16px rgba(0,0,0,0.15)',
         zIndex: 1300,
@@ -31,7 +34,14 @@ function ObjectStoreDetail({ store, onClose }: { store: CephObjectStore; onClose
         padding: '24px',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '16px',
+        }}
+      >
         <strong>{store.metadata.name}</strong>
         <button
           onClick={onClose}
@@ -67,7 +77,7 @@ function ObjectStoreDetail({ store, onClose }: { store: CephObjectStore; onClose
           ]}
         />
       </SectionBox>
-      {(endpoints?.insecure?.length || endpoints?.secure?.length) ? (
+      {endpoints?.insecure?.length || endpoints?.secure?.length ? (
         <SectionBox title="Endpoints">
           <NameValueTable
             rows={[
@@ -104,14 +114,21 @@ export default function ObjectStoresPage() {
 
       {error && (
         <SectionBox title="Error">
-          <NameValueTable rows={[{ name: 'Status', value: <StatusLabel status="error">{error}</StatusLabel> }]} />
+          <NameValueTable
+            rows={[{ name: 'Status', value: <StatusLabel status="error">{error}</StatusLabel> }]}
+          />
         </SectionBox>
       )}
 
       {objectStores.length === 0 ? (
         <SectionBox title="No Object Stores">
           <NameValueTable
-            rows={[{ name: 'Status', value: 'No CephObjectStore resources found in rook-ceph namespace.' }]}
+            rows={[
+              {
+                name: 'Status',
+                value: 'No CephObjectStore resources found in rook-ceph namespace.',
+              },
+            ]}
           />
         </SectionBox>
       ) : (
@@ -123,7 +140,15 @@ export default function ObjectStoresPage() {
                 getter: (o: CephObjectStore) => (
                   <button
                     onClick={() => setSelected(o)}
-                    style={{ border: 'none', background: 'transparent', color: 'var(--link-color, #1976d2)', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit' }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      color: 'var(--link-color, #1976d2)',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      padding: 0,
+                      font: 'inherit',
+                    }}
                   >
                     {o.metadata.name}
                   </button>
@@ -137,9 +162,18 @@ export default function ObjectStoresPage() {
                   </StatusLabel>
                 ),
               },
-              { label: 'Gateway Port', getter: (o: CephObjectStore) => String(o.spec?.gateway?.port ?? '—') },
-              { label: 'Instances', getter: (o: CephObjectStore) => String(o.spec?.gateway?.instances ?? '—') },
-              { label: 'Age', getter: (o: CephObjectStore) => formatAge(o.metadata.creationTimestamp) },
+              {
+                label: 'Gateway Port',
+                getter: (o: CephObjectStore) => String(o.spec?.gateway?.port ?? '—'),
+              },
+              {
+                label: 'Instances',
+                getter: (o: CephObjectStore) => String(o.spec?.gateway?.instances ?? '—'),
+              },
+              {
+                label: 'Age',
+                getter: (o: CephObjectStore) => formatAge(o.metadata.creationTimestamp),
+              },
             ]}
             data={objectStores}
           />
@@ -149,7 +183,12 @@ export default function ObjectStoresPage() {
       {selected && (
         <>
           <div
-            style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 1299 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              zIndex: 1299,
+            }}
             onClick={() => setSelected(null)}
           />
           <ObjectStoreDetail store={selected} onClose={() => setSelected(null)} />

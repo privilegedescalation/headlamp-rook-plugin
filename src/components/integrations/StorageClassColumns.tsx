@@ -64,7 +64,7 @@ export function buildStorageClassColumns() {
     },
     {
       label: 'Pool',
-      getValue: (item: unknown) => getField(item, 'parameters', 'pool') as string | null ?? null,
+      getValue: (item: unknown) => (getField(item, 'parameters', 'pool') as string | null) ?? null,
       render: (item: unknown) => {
         if (!isRookRow(item)) return <span>—</span>;
         const pool = getField(item, 'parameters', 'pool') as string | undefined;
@@ -73,12 +73,17 @@ export function buildStorageClassColumns() {
     },
     {
       label: 'Cluster',
-      getValue: (item: unknown) => getField(item, 'parameters', 'clusterID') as string | null ?? null,
+      getValue: (item: unknown) =>
+        (getField(item, 'parameters', 'clusterID') as string | null) ?? null,
       render: (item: unknown) => {
         if (!isRookRow(item)) return <span>—</span>;
         const clusterID = getField(item, 'parameters', 'clusterID') as string | undefined;
         if (!clusterID) return <span>—</span>;
-        return <span title={clusterID}>{clusterID.length > 16 ? `${clusterID.slice(0, 16)}…` : clusterID}</span>;
+        return (
+          <span title={clusterID}>
+            {clusterID.length > 16 ? `${clusterID.slice(0, 16)}…` : clusterID}
+          </span>
+        );
       },
     },
   ];
@@ -101,10 +106,13 @@ export function buildPVColumns() {
     },
     {
       label: 'Pool',
-      getValue: (item: unknown) => getField(item, 'spec', 'csi', 'volumeAttributes', 'pool') as string | null ?? null,
+      getValue: (item: unknown) =>
+        (getField(item, 'spec', 'csi', 'volumeAttributes', 'pool') as string | null) ?? null,
       render: (item: unknown) => {
         if (!isRookPvRow(item)) return <span>—</span>;
-        const pool = getField(item, 'spec', 'csi', 'volumeAttributes', 'pool') as string | undefined;
+        const pool = getField(item, 'spec', 'csi', 'volumeAttributes', 'pool') as
+          | string
+          | undefined;
         return <span>{pool ?? '—'}</span>;
       },
     },

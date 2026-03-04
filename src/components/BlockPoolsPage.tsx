@@ -19,7 +19,10 @@ function BlockPoolDetail({ pool, onClose }: { pool: CephBlockPool; onClose: () =
     <div
       style={{
         position: 'fixed',
-        top: 0, right: 0, bottom: 0, width: '480px',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: '480px',
         backgroundColor: 'var(--mui-palette-background-paper, #fff)',
         boxShadow: '-4px 0 16px rgba(0,0,0,0.15)',
         zIndex: 1300,
@@ -27,7 +30,14 @@ function BlockPoolDetail({ pool, onClose }: { pool: CephBlockPool; onClose: () =
         padding: '24px',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '16px',
+        }}
+      >
         <strong>{pool.metadata.name}</strong>
         <button
           onClick={onClose}
@@ -99,14 +109,18 @@ export default function BlockPoolsPage() {
 
       {error && (
         <SectionBox title="Error">
-          <NameValueTable rows={[{ name: 'Status', value: <StatusLabel status="error">{error}</StatusLabel> }]} />
+          <NameValueTable
+            rows={[{ name: 'Status', value: <StatusLabel status="error">{error}</StatusLabel> }]}
+          />
         </SectionBox>
       )}
 
       {blockPools.length === 0 ? (
         <SectionBox title="No Block Pools">
           <NameValueTable
-            rows={[{ name: 'Status', value: 'No CephBlockPool resources found in rook-ceph namespace.' }]}
+            rows={[
+              { name: 'Status', value: 'No CephBlockPool resources found in rook-ceph namespace.' },
+            ]}
           />
         </SectionBox>
       ) : (
@@ -118,7 +132,15 @@ export default function BlockPoolsPage() {
                 getter: (p: CephBlockPool) => (
                   <button
                     onClick={() => setSelected(p)}
-                    style={{ border: 'none', background: 'transparent', color: 'var(--link-color, #1976d2)', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit' }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      color: 'var(--link-color, #1976d2)',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      padding: 0,
+                      font: 'inherit',
+                    }}
                   >
                     {p.metadata.name}
                   </button>
@@ -132,10 +154,22 @@ export default function BlockPoolsPage() {
                   </StatusLabel>
                 ),
               },
-              { label: 'Replicas', getter: (p: CephBlockPool) => String(p.spec?.replicated?.size ?? '—') },
-              { label: 'Failure Domain', getter: (p: CephBlockPool) => p.spec?.failureDomain ?? '—' },
-              { label: 'Mirroring', getter: (p: CephBlockPool) => p.spec?.mirroring?.enabled ? 'Enabled' : 'Disabled' },
-              { label: 'Age', getter: (p: CephBlockPool) => formatAge(p.metadata.creationTimestamp) },
+              {
+                label: 'Replicas',
+                getter: (p: CephBlockPool) => String(p.spec?.replicated?.size ?? '—'),
+              },
+              {
+                label: 'Failure Domain',
+                getter: (p: CephBlockPool) => p.spec?.failureDomain ?? '—',
+              },
+              {
+                label: 'Mirroring',
+                getter: (p: CephBlockPool) => (p.spec?.mirroring?.enabled ? 'Enabled' : 'Disabled'),
+              },
+              {
+                label: 'Age',
+                getter: (p: CephBlockPool) => formatAge(p.metadata.creationTimestamp),
+              },
             ]}
             data={blockPools}
           />
@@ -145,7 +179,12 @@ export default function BlockPoolsPage() {
       {selected && (
         <>
           <div
-            style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 1299 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              zIndex: 1299,
+            }}
             onClick={() => setSelected(null)}
           />
           <BlockPoolDetail pool={selected} onClose={() => setSelected(null)} />
