@@ -1,7 +1,7 @@
 # Headlamp Rook Plugin
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/package/headlamp/rook/headlamp-rook-plugin)](https://artifacthub.io/packages/headlamp/rook/headlamp-rook-plugin)
-[![CI](https://github.com/cpfarhood/headlamp-rook-plugin/actions/workflows/ci.yaml/badge.svg)](https://github.com/cpfarhood/headlamp-rook-plugin/actions/workflows/ci.yaml)
+[![CI](https://github.com/privilegedescalation/headlamp-rook-plugin/actions/workflows/ci.yaml/badge.svg)](https://github.com/privilegedescalation/headlamp-rook-plugin/actions/workflows/ci.yaml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A [Headlamp](https://headlamp.dev/) plugin that surfaces [Rook-Ceph](https://rook.io/) cluster health, storage resources, and CSI driver status directly in the Headlamp UI.
@@ -58,7 +58,7 @@ Download the latest release tarball and place it in your Headlamp plugins direct
 
 ```bash
 # Download the latest release
-curl -L https://github.com/cpfarhood/headlamp-rook-plugin/releases/latest/download/headlamp-rook-plugin-<version>.tar.gz \
+curl -L https://github.com/privilegedescalation/headlamp-rook-plugin/releases/latest/download/headlamp-rook-plugin-<version>.tar.gz \
   -o headlamp-rook-plugin.tar.gz
 
 # Extract to Headlamp plugins directory
@@ -128,7 +128,7 @@ subjects:
 ### Setup
 
 ```bash
-git clone https://github.com/cpfarhood/headlamp-rook-plugin.git
+git clone https://github.com/privilegedescalation/headlamp-rook-plugin.git
 cd headlamp-rook-plugin
 npm install
 ```
