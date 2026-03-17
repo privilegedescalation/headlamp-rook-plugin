@@ -48,22 +48,7 @@ Rook-Ceph must be deployed in the `rook-ceph` namespace with standard labels. Th
 
 ## Installing
 
-### Option 1: Headlamp Plugin Manager (Recommended)
-
 Browse the Headlamp Plugin Manager (Settings → Plugins → Catalog) and install **headlamp-rook-plugin** directly.
-
-### Option 2: Manual Plugin Install
-
-Download the latest release tarball and place it in your Headlamp plugins directory:
-
-```bash
-# Download the latest release
-curl -L https://github.com/privilegedescalation/headlamp-rook-plugin/releases/latest/download/headlamp-rook-plugin-<version>.tar.gz \
-  -o headlamp-rook-plugin.tar.gz
-
-# Extract to Headlamp plugins directory
-tar -xzf headlamp-rook-plugin.tar.gz -C ~/.config/Headlamp/plugins/
-```
 
 ## RBAC & Security Setup
 
