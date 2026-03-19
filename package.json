@@ -1,6 +1,6 @@
 {
   "name": "rook",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Headlamp plugin for Rook-Ceph cluster visibility and CSI driver monitoring",
   "repository": {
     "type": "git",
