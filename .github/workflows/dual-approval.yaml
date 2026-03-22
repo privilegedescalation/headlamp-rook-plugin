@@ -1,0 +1,18 @@
+name: Dual Approval (CTO + QA)
+
+# Calls the shared dual-approval-check workflow.
+# Passes when both privilegedescalation-cto and privilegedescalation-qa
+# have approved the PR. Add "Dual Approval (CTO + QA)" to required_status_checks
+# in branch protection to enforce this gate.
+
+on:
+  pull_request_review:
+    types: [submitted, dismissed]
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+
+jobs:
+  dual-approval:
+    uses: privilegedescalation/.github/.github/workflows/dual-approval-check.yaml@main
+    secrets: inherit
