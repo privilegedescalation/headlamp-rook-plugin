@@ -1,21 +1,5 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
-  "baseBranches": ["main"],
-  "schedule": ["every weekend"],
-  "prConcurrentLimit": 10,
-  "pinDigests": true,
-  "packageRules": [
-    {
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "npm minor and patch"
-    },
-    {
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "github-actions minor and patch"
-    }
-  ]
+  "extends": ["github>privilegedescalation/.github:renovate-config"]
 }
 
