@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-03-24
+
+### Added
+
+- **Test infrastructure** — added `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`, `jsdom`, `react`, `react-dom`, `@types/react`, `@types/react-dom`, `react-router-dom`, `@mui/material`, and `notistack` as devDependencies so the test suite can run in CI without requiring the full Headlamp monorepo
+- **`vitest.config.mts`** — added `define: { 'process.env.NODE_ENV': '"test"' }` block to fix test environment compatibility with jsdom and React 18
+- **CI: dual-approval caller workflow** — two-reviewer gate before any release can proceed
+- **Renovate: org-level preset extension** — Renovate config now extends the organisation-level preset for consistent dependency management across repos
+- **Renovate: `pinDigests`** — GitHub Actions are now pinned to exact SHAs for supply-chain security
+
+### Changed
+
+- **Version bump to 1.0.0** — first stable release; all core features (Overview, Block Pools, Filesystems, Object Stores, Storage Classes, Volumes, Pods pages; StorageClass/PV column injection; PVC/PV/Pod detail sections; App Bar badge; RookCephDataContext) are considered production-ready
+- **Lock file** — switched from `package-lock.json` to `pnpm-lock.yaml`; project now uses pnpm as the canonical package manager
+
 ## [0.2.6] - 2026-03-04
 
 ### Fixed
@@ -97,7 +112,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript strict mode with zero `any` types
 - ESLint + Prettier code quality tooling
 
-[Unreleased]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.2.6...HEAD
+[Unreleased]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.2.8...v1.0.0
 [0.2.6]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.2.5...v0.2.6
 [0.2.2]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/privilegedescalation/headlamp-rook-plugin/compare/v0.2.0...v0.2.1

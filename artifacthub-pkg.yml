@@ -1,4 +1,4 @@
-version: "0.2.8"
+version: "1.0.0"
 name: headlamp-rook-plugin
 displayName: Rook Plugin
 createdAt: "2026-02-18T00:00:00Z"
@@ -24,10 +24,18 @@ provider:
   name: privilegedescalation
 changes:
   - kind: changed
-    description: "Package renamed to rook so the plugin displays correctly in Headlamp's Plugins list"
+    description: "Bump to v1.0.0 stable release"
+  - kind: added
+    description: "Test infrastructure: add vitest, @testing-library/react, jsdom, and related devDependencies so CI tests pass"
+  - kind: added
+    description: "vitest.config.mts: add define block for process.env.NODE_ENV to fix test environment compatibility"
+  - kind: added
+    description: "CI: dual-approval caller workflow and GitHub App token secret passing to release workflow"
+  - kind: changed
+    description: "Renovate: extend org-level config preset and add pinDigests for SHA pinning of GitHub Actions"
 
 annotations:
-  headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-plugin/releases/download/v0.2.8/rook-0.2.8.tar.gz"
-  headlamp/plugin/archive-checksum: sha256:3ae136b0ad0a1f726df10fd3445fd5e05e7b51c95760634640b796cda7d0bd2e
+  headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-plugin/releases/download/v1.0.0/rook-1.0.0.tar.gz"
+  headlamp/plugin/archive-checksum: sha256:TBD-set-by-release-workflow
   headlamp/plugin/distro-compat: ""
   headlamp/plugin/version-compat: ">=0.20"
