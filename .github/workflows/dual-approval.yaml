@@ -15,4 +15,6 @@ on:
 jobs:
   dual-approval:
     uses: privilegedescalation/.github/.github/workflows/dual-approval-check.yaml@main
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
     secrets: inherit
