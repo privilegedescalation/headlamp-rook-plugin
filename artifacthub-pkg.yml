@@ -1,4 +1,4 @@
-version: "1.0.0"
+version: "1.0.1"
 name: headlamp-rook-plugin
 displayName: Rook Plugin
 createdAt: "2026-02-18T00:00:00Z"
@@ -24,7 +24,7 @@ provider:
   name: privilegedescalation
 changes:
   - kind: changed
-    description: "Bump to v1.0.0 stable release"
+    description: "Bump to v1.0.1 patch release — fix ArtifactHub checksum"
   - kind: added
     description: "Test infrastructure: add vitest, @testing-library/react, jsdom, and related devDependencies so CI tests pass"
   - kind: added
