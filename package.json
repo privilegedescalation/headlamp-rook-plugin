@@ -1,6 +1,6 @@
 {
   "name": "rook",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Headlamp plugin for Rook-Ceph cluster visibility and CSI driver monitoring",
   "repository": {
     "type": "git",
@@ -12,7 +12,6 @@
   "homepage": "https://github.com/privilegedescalation/headlamp-rook-plugin#readme",
   "author": "privilegedescalation",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@10.32.1",
   "scripts": {
     "start": "headlamp-plugin start",
     "build": "headlamp-plugin build",
