@@ -36,6 +36,6 @@ changes:
 
 annotations:
   headlamp/plugin/archive-url: "https://github.com/privilegedescalation/headlamp-rook-plugin/releases/download/v1.0.1/rook-1.0.1.tar.gz"
-  headlamp/plugin/archive-checksum: sha256:36a62cda46194fd88335e3b3af12e7c89bb1ec21671c747e0bc2e1e3cd02d0fc
+  headlamp/plugin/archive-checksum: sha256:fb8d61060fd1c7340dc8c23931dd471e1451aeea8369a033bfa8bf54cd032ebb
   headlamp/plugin/distro-compat: ""
   headlamp/plugin/version-compat: ">=0.20"
