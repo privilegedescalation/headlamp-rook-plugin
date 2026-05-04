@@ -18,10 +18,10 @@ links:
   - name: source
     url: https://github.com/privilegedescalation/headlamp-rook-plugin
 maintainers:
-  - name: privilegedescalation
+  - name: headlamp
     email: privilegedescalation@users.noreply.github.com
 provider:
-  name: privilegedescalation
+  name: headlamp
 changes:
   - kind: changed
     description: "Bump to v1.0.1 patch release — fix ArtifactHub checksum"

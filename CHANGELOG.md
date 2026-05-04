@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **ArtifactHub namespace** — updated `provider.name` and `maintainers[].name` in `artifacthub-pkg.yml` from `privilegedescalation` to `headlamp` to reflect the ArtifactHub package namespace
+
 ## [1.0.0] - 2026-03-24
 
 ### Added
