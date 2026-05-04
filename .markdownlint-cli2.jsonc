@@ -1,0 +1,53 @@
+{
+  "config": {
+    // Line length — not enforced for docs with code examples
+    "MD013": false,
+    // First line heading — files use YAML frontmatter, not headings
+    "MD041": false,
+    // Emphasis as heading — common pattern for Option 1/2/3 sections
+    "MD036": false,
+    // No duplicate heading — changelog files repeat section names intentionally
+    "MD024": false,
+    // Fenced code language — not always applicable for diagram blocks
+    "MD040": false,
+    // Table column style — table alignment is visual, not semantic
+    "MD060": false,
+    // Ordered list item prefix — number resets are intentional in documents
+    "MD029": false,
+    // No inline HTML — each elements are valid in valid Markdown
+    "MD033": false,
+    // List marker space — spacing after list markers varies by editor
+    "MD030": false,
+    // Blanks around headings — not always needed in compact docs
+    "MD022": false,
+    // Blanks around lists — not always needed in compact docs
+    "MD032": false,
+    // Blanks around fences — not always needed between adjacent blocks
+    "MD031": false,
+    // Multiple blanks — editor artifacts, not semantic
+    "MD012": false,
+    // Single title — files may have multiple H1 sections
+    "MD025": false,
+    // Trailing spaces — editor artifacts
+    "MD009": false,
+    // Bare URLs — URL shortening not always needed
+    "MD034": false,
+    // Single trailing newline — editor artifacts
+    "MD047": false,
+    // Trailing punctuation — heading punctuation is intentional
+    "MD026": false,
+    // Space in emphasis — double-asterisk bold spacing varies by renderer
+    "MD037": false,
+    // No hard tabs — some generated docs use tabs for indentation
+    "MD010": false,
+    // Code block style — generated docs may use inconsistent styles
+    "MD046": false,
+    // Comment style — generated docs have no comments
+    "MD048": false,
+    // Commands show output — shell examples intentionally show only commands
+    "MD014": false
+  },
+  "ignores": [
+    "docs/api-reference/generated/**"
+  ]
+}
