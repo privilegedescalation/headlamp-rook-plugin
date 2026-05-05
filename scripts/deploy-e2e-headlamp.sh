@@ -53,9 +53,54 @@ kubectl create configmap headlamp-rook-plugin \
 
 echo ""
 echo "Removing any existing E2E deployment (clean-start)..."
+kubectl delete clusterrolebinding headlamp-e2e-test-crb --ignore-not-found 2>/dev/null || true
 kubectl delete deployment "${E2E_RELEASE}" -n "$E2E_NAMESPACE" --ignore-not-found --wait
 kubectl delete service "${E2E_RELEASE}" -n "$E2E_NAMESPACE" --ignore-not-found --wait
 kubectl delete serviceaccount "${E2E_RELEASE}" -n "$E2E_NAMESPACE" --ignore-not-found --wait
+kubectl delete serviceaccount headlamp-e2e-test -n "$E2E_NAMESPACE" --ignore-not-found 2>/dev/null || true
+
+echo ""
+echo "Creating E2E service account..."
+kubectl create serviceaccount headlamp-e2e-test -n "$E2E_NAMESPACE"
+
+echo ""
+echo "Creating RBAC for E2E service account..."
+kubectl apply -f - <<EOF
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: headlamp-e2e-test-reader
+rules:
+  - apiGroups: [""]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["ceph.rook.io"]
+    resources: ["cephclusters"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["ceph.rook.io"]
+    resources: ["cephclusters/status"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: headlamp-e2e-test-crb
+subjects:
+  - kind: ServiceAccount
+    name: headlamp-e2e-test
+    namespace: ${E2E_NAMESPACE}
+roleRef:
+  kind: ClusterRole
+  name: headlamp-e2e-test-reader
+  apiGroup: rbac.authorization.k8s.io
+EOF
 
 echo ""
 echo "Deploying Headlamp E2E instance..."
@@ -173,9 +218,6 @@ echo "E2E Headlamp is ready at: ${SVC_URL}"
 
 echo ""
 echo "Creating service account token for E2E auth..."
-kubectl create serviceaccount headlamp-e2e-test \
-  -n "$E2E_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
-
 TOKEN=$(kubectl create token headlamp-e2e-test -n "$E2E_NAMESPACE" --duration=1h 2>/dev/null || echo "")
 if [ -n "$TOKEN" ]; then
   echo "HEADLAMP_URL=${SVC_URL}" > "$REPO_ROOT/.env.e2e"
