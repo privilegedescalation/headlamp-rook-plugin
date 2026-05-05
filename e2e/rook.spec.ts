@@ -45,11 +45,15 @@ test.describe('Rook plugin smoke tests', () => {
     const sidebar = page.getByRole('navigation', { name: 'Navigation' });
 
     const rookBtn = sidebar.getByRole('button', { name: /rook/i });
+    await expect(rookBtn).toBeVisible();
     await rookBtn.click();
     await page.waitForLoadState('networkidle');
 
-    const storageClassesLink = sidebar.getByRole('link', { name: /storage classes/i });
-    await expect(storageClassesLink).toBeVisible({ timeout: 10_000 });
+    const sidebarAfterClick = page.getByRole('navigation', { name: 'Navigation' });
+    await expect(sidebarAfterClick).toBeVisible();
+
+    const storageClassesLink = sidebarAfterClick.getByRole('link', { name: /storage classes/i });
+    await storageClassesLink.waitFor({ state: 'visible', timeout: 15_000 });
     await storageClassesLink.click();
 
     await page.waitForLoadState('networkidle');
