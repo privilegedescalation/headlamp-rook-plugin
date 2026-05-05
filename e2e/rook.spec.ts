@@ -24,14 +24,14 @@ test.describe('Rook plugin smoke tests', () => {
 
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/rook-ceph/);
-    await expect(page.getByRole('heading', { name: /overview/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /overview/i }).first()).toBeVisible();
   });
 
   test('overview page renders content', async ({ page }) => {
     await page.goto('/c/main/rook-ceph');
     await waitForSidebar(page);
 
-    await expect(page.getByRole('heading', { name: /overview/i })).toBeVisible({
+    await expect(page.getByRole('heading', { name: /overview/i }).first()).toBeVisible({
       timeout: 15_000,
     });
 
@@ -54,13 +54,13 @@ test.describe('Rook plugin smoke tests', () => {
 
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/rook-ceph\/storage-classes/);
-    await expect(page.getByRole('heading', { name: /storage class/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /storage class/i }).first()).toBeVisible({ timeout: 15_000 });
   });
 
   test('plugin settings page shows rook plugin entry', async ({ page }) => {
     await page.goto('/settings/plugins');
     await page.waitForLoadState('networkidle');
-    await page.waitForSelector('[class*="PluginList"], [class*="plugins"], table, list', { timeout: 10_000 }).catch(() => {});
+    await page.waitForSelector('table, [class*="PluginList"], [class*="plugin"]', { timeout: 10_000 }).catch(() => {});
 
     const pluginEntry = page.locator('text=/rook/i').first();
     await expect(pluginEntry).toBeVisible({ timeout: 30_000 });
