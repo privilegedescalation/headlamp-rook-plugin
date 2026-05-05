@@ -18,6 +18,6 @@ jobs:
   e2e:
     uses: privilegedescalation/.github/.github/workflows/plugin-e2e.yaml@hugh/add-pnpm-support-plugin-e2e
     with:
-      node-version: '22'
+      node-version: "22"
       headlamp-version: v0.40.1
       e2e-namespace: headlamp-dev
