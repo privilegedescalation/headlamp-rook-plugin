@@ -22,12 +22,15 @@
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed"
   },
   "devDependencies": {
     "@headlamp-k8s/eslint-config": "^0.6.0",
     "@kinvolk/headlamp-plugin": "^0.13.0",
     "@mui/material": "^5.15.14",
+    "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.5.2",
