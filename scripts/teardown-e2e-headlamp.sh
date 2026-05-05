@@ -25,8 +25,10 @@ kubectl delete serviceaccount "${E2E_RELEASE}" -n "$E2E_NAMESPACE" --ignore-not-
 echo "Cleaning up ConfigMap..."
 kubectl delete configmap headlamp-rook-plugin -n "$E2E_NAMESPACE" --ignore-not-found
 
-echo "Cleaning up test service account..."
+echo "Cleaning up test service account and RBAC..."
 kubectl delete serviceaccount headlamp-e2e-test -n "$E2E_NAMESPACE" --ignore-not-found
+kubectl delete clusterrolebinding headlamp-e2e-test-crb --ignore-not-found 2>/dev/null || true
+kubectl delete clusterrole headlamp-e2e-test-reader --ignore-not-found 2>/dev/null || true
 
 if [ -f "$REPO_ROOT/.env.e2e" ]; then
   rm "$REPO_ROOT/.env.e2e"
