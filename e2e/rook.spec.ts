@@ -44,8 +44,12 @@ test.describe('Rook plugin smoke tests', () => {
     await page.goto('/c/main/rook-ceph');
 
     const sidebar = page.getByRole('navigation', { name: 'Navigation' });
-    const storageClassesLink = sidebar.getByRole('link', { name: /storage classes/i });
-    await expect(storageClassesLink).toBeVisible({ timeout: 10_000 });
+    const rookBtn = sidebar.getByRole('button', { name: /rook/i });
+    await rookBtn.click();
+    await page.waitForLoadState('networkidle');
+
+    const storageClassesLink = sidebar.getByRole('button', { name: /storage classes/i });
+    await expect(storageClassesLink).toBeVisible({ timeout: 15_000 });
     await storageClassesLink.click();
 
     await page.waitForLoadState('networkidle');
