@@ -24,14 +24,14 @@ test.describe('Rook plugin smoke tests', () => {
 
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/rook-ceph/);
-    await expect(page.getByRole('heading', { name: /overview/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /overview/i }).first()).toBeVisible();
   });
 
   test('overview page renders content', async ({ page }) => {
     await page.goto('/c/main/rook-ceph');
     await waitForSidebar(page);
 
-    await expect(page.getByRole('heading', { name: /overview/i })).toBeVisible({
+    await expect(page.getByRole('heading', { name: /overview/i }).first()).toBeVisible({
       timeout: 15_000,
     });
 
@@ -42,22 +42,27 @@ test.describe('Rook plugin smoke tests', () => {
 
   test('navigation to storage classes view works', async ({ page }) => {
     await page.goto('/c/main/rook-ceph');
-
     const sidebar = page.getByRole('navigation', { name: 'Navigation' });
+
+    const rookBtn = sidebar.getByRole('button', { name: /rook/i });
+    await rookBtn.click();
+    await page.waitForLoadState('networkidle');
+
     const storageClassesLink = sidebar.getByRole('link', { name: /storage classes/i });
     await expect(storageClassesLink).toBeVisible({ timeout: 10_000 });
     await storageClassesLink.click();
 
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/rook-ceph\/storage-classes/);
-    await expect(page.getByRole('heading', { name: /storage class/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /storage class/i }).first()).toBeVisible({ timeout: 15_000 });
   });
 
   test('plugin settings page shows rook plugin entry', async ({ page }) => {
     await page.goto('/settings/plugins');
     await page.waitForLoadState('networkidle');
+    await page.waitForSelector('table, [class*="PluginList"], [class*="plugin"]', { timeout: 10_000 }).catch(() => {});
 
-    const pluginEntry = page.locator('text=rook').first();
+    const pluginEntry = page.locator('text=/rook/i').first();
     await expect(pluginEntry).toBeVisible({ timeout: 30_000 });
   });
 });
