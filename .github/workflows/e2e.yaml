@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   e2e:
-    uses: privilegedescalation/.github/.github/workflows/plugin-e2e.yaml@hugh/add-pnpm-support-plugin-e2e
+    uses: privilegedescalation/.github/.github/workflows/plugin-e2e.yaml@main
     with:
       node-version: '22'
       headlamp-version: v0.40.1
