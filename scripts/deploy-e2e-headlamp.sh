@@ -124,7 +124,7 @@ spec:
               port: http
             initialDelaySeconds: 5
             periodSeconds: 5
-              failureThreshold: 6
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /
