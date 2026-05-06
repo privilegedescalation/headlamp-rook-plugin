@@ -98,6 +98,9 @@ rules:
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -234,14 +237,17 @@ echo ""
 echo "E2E Headlamp is ready at: ${SVC_URL}"
 
 echo ""
+echo "Writing E2E env file..."
+echo "HEADLAMP_URL=${SVC_URL}" > "$REPO_ROOT/.env.e2e"
+
+echo ""
 echo "Creating service account token for E2E auth..."
 TOKEN=$(kubectl create token headlamp-e2e-test -n "$E2E_NAMESPACE" --duration=1h 2>/dev/null || echo "")
 if [ -n "$TOKEN" ]; then
-  echo "HEADLAMP_URL=${SVC_URL}" > "$REPO_ROOT/.env.e2e"
   echo "HEADLAMP_TOKEN=${TOKEN}" >> "$REPO_ROOT/.env.e2e"
   echo "Wrote .env.e2e with HEADLAMP_URL and HEADLAMP_TOKEN"
 else
-  echo "  WARNING: Could not generate token."
+  echo "Wrote .env.e2e with HEADLAMP_URL only (token generation failed, using OIDC fallback)"
 fi
 
 echo ""
