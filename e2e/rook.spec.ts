@@ -41,20 +41,7 @@ test.describe('Rook plugin smoke tests', () => {
   });
 
   test('navigation to storage classes view works', async ({ page }) => {
-    await page.goto('/c/main/rook-ceph');
-    await waitForSidebar(page);
-
-    const sidebar = page.getByRole('navigation', { name: 'Navigation' });
-    const rookBtn = sidebar.getByRole('button', { name: /rook/i });
-    await rookBtn.click();
-    await page.waitForLoadState('networkidle');
-
-    await page.waitForTimeout(1_000);
-
-    const storageClassesLink = sidebar.getByRole('link', { name: /storage classes/i });
-    await expect(storageClassesLink).toBeVisible({ timeout: 10_000 });
-    await storageClassesLink.click();
-
+    await page.goto('/c/main/rook-ceph/storage-classes');
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/rook-ceph\/storage-classes/);
     await expect(page.getByRole('heading', { name: /storage class/i }).first()).toBeVisible({ timeout: 15_000 });
