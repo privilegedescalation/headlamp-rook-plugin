@@ -35,6 +35,17 @@ if ! kubectl auth can-i delete configmaps -n "$E2E_NAMESPACE" --quiet 2>/dev/nul
   exit 1
 fi
 
+echo ""
+echo "=== Pre-deployment cluster diagnostics ==="
+echo "Nodes:"
+kubectl get nodes -o wide 2>&1 || true
+echo ""
+echo "headlamp-dev namespace state:"
+kubectl get ns headlamp-dev -o yaml 2>&1 || true
+echo ""
+echo "Existing E2E resources in namespace:"
+kubectl get all -n "$E2E_NAMESPACE" -l "app.kubernetes.io/instance=$E2E_RELEASE" 2>&1 || true
+
 echo "=== E2E Headlamp Deployment ==="
 echo "  Image:     ghcr.io/headlamp-k8s/headlamp:${HEADLAMP_VERSION}"
 echo "  Namespace: $E2E_NAMESPACE"
@@ -60,7 +71,7 @@ kubectl delete serviceaccount "${E2E_RELEASE}" -n "$E2E_NAMESPACE" --ignore-not-
 echo ""
 echo "Deploying Headlamp E2E instance..."
 
-kubectl apply -f - <<EOF
+if ! kubectl apply -f - <<EOF
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -113,7 +124,7 @@ spec:
               port: http
             initialDelaySeconds: 5
             periodSeconds: 5
-            failureThreshold: 6
+              failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /
@@ -148,6 +159,12 @@ spec:
       targetPort: http
       protocol: TCP
 EOF
+then
+  echo "ERROR: kubectl apply failed. Dumping cluster state..." >&2
+  kubectl get all -n "$E2E_NAMESPACE" 2>&1 || true
+  kubectl get events -n "$E2E_NAMESPACE" --sort-by='.lastTimestamp' 2>&1 | tail -30 || true
+  exit 1
+fi
 
 echo "Waiting for rollout..."
 kubectl rollout status "deployment/${E2E_RELEASE}" \
