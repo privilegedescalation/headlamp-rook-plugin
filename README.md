@@ -90,7 +90,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: headlamp
-    namespace: headlamp
+    namespace: <your-namespace>
 ```
 
 ## Troubleshooting
