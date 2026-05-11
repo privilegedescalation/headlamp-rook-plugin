@@ -1,20 +1,21 @@
-name: Dual Approval (CTO + QA)
+name: Promotion Gate
 
-# Calls the shared dual-approval-check workflow.
-# Passes when both privilegedescalation-cto and privilegedescalation-qa
-# have approved the PR. Add "Dual Approval (CTO + QA)" to required_status_checks
-# in branch protection to enforce this gate.
+# Calls the shared promotion gate workflow.
+# dev PRs: no gate (engineer self-merges).
+# uat PRs: QA approval required.
+# main PRs: UAT approval required (uat→main promotions).
 
 on:
   pull_request_review:
     types: [submitted, dismissed]
   pull_request:
-    branches: [main]
+    branches: [uat, main]
     types: [opened, reopened, synchronize]
 
 jobs:
-  dual-approval:
+  promotion-gate:
     uses: privilegedescalation/.github/.github/workflows/dual-approval-check.yaml@main
     secrets: inherit
     with:
       pr_number: ${{ github.event.pull_request.number }}
+
