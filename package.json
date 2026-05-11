@@ -12,6 +12,13 @@
   "homepage": "https://github.com/privilegedescalation/headlamp-rook-plugin#readme",
   "author": "privilegedescalation",
   "license": "Apache-2.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "esbuild",
+      "msw"
+    ]
+  },
   "scripts": {
     "start": "headlamp-plugin start",
     "build": "headlamp-plugin build",
