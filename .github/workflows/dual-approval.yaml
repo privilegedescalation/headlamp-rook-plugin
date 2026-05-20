@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Install dependencies
-        run: apt-get update -qq && apt-get install -y --no-install-recommends curl jq
+        run: apt-get update -qq && apt-get install -y --no-install-recommends ca-certificates curl jq
 
       - name: Check promotion approval
         env:
