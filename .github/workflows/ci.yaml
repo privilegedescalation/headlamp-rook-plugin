@@ -2,12 +2,210 @@ name: CI
 
 on:
   push:
-    branches: [main, dev, uat]
+    branches: ['**']
   pull_request:
     branches: [main, dev, uat]
   workflow_dispatch:
-  workflow_call:
+
+permissions:
+  contents: read
 
 jobs:
   ci:
-    uses: privilegedescalation/.github/.github/workflows/plugin-ci.yaml@main
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container: node:22-slim
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Python
+        run: apt-get update && apt-get install -y --no-install-recommends python3 python3-yaml
+
+      - name: Validate artifacthub-pkg.yml
+        run: |
+          python3 - <<'EOF'
+          import sys, re
+          try:
+              import yaml
+          except ImportError:
+              print("::warning::PyYAML not available, skipping artifacthub-pkg.yml validation")
+              sys.exit(0)
+
+          try:
+              with open("artifacthub-pkg.yml") as f:
+                  pkg = yaml.safe_load(f)
+          except FileNotFoundError:
+              print("::error::artifacthub-pkg.yml not found")
+              sys.exit(1)
+          except yaml.YAMLError as e:
+              print(f"::error::artifacthub-pkg.yml is invalid YAML: {e}")
+              sys.exit(1)
+
+          errors = []
+
+          for field in ["version", "name", "description", "homeURL"]:
+              if not pkg.get(field):
+                  errors.append(f"Missing required field: {field}")
+
+          version = pkg.get("version", "")
+          if version and not re.match(r'^\d+\.\d+\.\d+$', str(version)):
+              errors.append(f"version '{version}' is not SemVer (expected X.Y.Z)")
+
+          annotations = pkg.get("annotations", {}) or {}
+          archive_url = annotations.get("headlamp/plugin/archive-url", "")
+          archive_checksum = annotations.get("headlamp/plugin/archive-checksum", "")
+
+          if not archive_url:
+              errors.append("Missing annotation: headlamp/plugin/archive-url")
+          if not archive_checksum:
+              errors.append("Missing annotation: headlamp/plugin/archive-checksum")
+          elif not re.match(r'^sha256:[0-9a-f]{64}$', str(archive_checksum)):
+              errors.append(f"archive-checksum has unexpected format: '{archive_checksum}' (expected sha256:<64 hex chars>)")
+
+          if errors:
+              for e in errors:
+                  print(f"::error::{e}")
+              sys.exit(1)
+
+          print(f"artifacthub-pkg.yml valid: name={pkg['name']} version={pkg['version']}")
+          EOF
+
+      - name: Detect package manager
+        id: pkg-manager
+        run: |
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "manager=pnpm" >> $GITHUB_OUTPUT
+            PM=$(python3 -c "import json,sys; d=json.load(open('package.json')); print('true' if d.get('packageManager','').startswith('pnpm@') else 'false')" 2>/dev/null || echo "false")
+            echo "has_package_manager=$PM" >> $GITHUB_OUTPUT
+          else
+            echo "manager=npm" >> $GITHUB_OUTPUT
+            echo "has_package_manager=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: ${{ steps.pkg-manager.outputs.manager == 'npm' && 'npm' || '' }}
+
+      - name: Setup pnpm (via Corepack, reads version from packageManager field)
+        if: steps.pkg-manager.outputs.manager == 'pnpm' && steps.pkg-manager.outputs.has_package_manager == 'true'
+        run: |
+          npm install -g corepack
+          corepack enable pnpm
+          corepack install
+
+      - name: Setup pnpm (version latest)
+        if: steps.pkg-manager.outputs.manager == 'pnpm' && steps.pkg-manager.outputs.has_package_manager == 'false'
+        uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+          version: latest
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        if: steps.pkg-manager.outputs.manager == 'pnpm'
+        run: echo "dir=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        if: steps.pkg-manager.outputs.manager == 'pnpm'
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-store.outputs.dir }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Validate pnpm lockfile freshness
+        if: steps.pkg-manager.outputs.manager == 'pnpm'
+        run: |
+          if [ ! -f "pnpm-lock.yaml" ]; then
+            echo "No pnpm-lock.yaml found, skipping lockfile freshness check"
+            exit 0
+          fi
+          if ! grep -q 'overrides:' pnpm-lock.yaml 2>/dev/null; then
+            echo "No overrides section in pnpm-lock.yaml, skipping lockfile freshness check"
+            exit 0
+          fi
+          echo "Detected pnpm-lock.yaml with overrides section. Checking lockfile freshness..."
+          ERR_FILE=$(mktemp)
+          if pnpm install --frozen-lockfile 2>&1 | tee "$ERR_FILE"; then
+            echo "Lockfile is fresh."
+          else
+            if grep -q "CONFIG_MISMATCH\|EBADLOCKFILE\|ERR_PNPM_LOCKFILE" "$ERR_FILE"; then
+              echo ""
+              echo "::error::pnpm-lock.yaml is out of sync with package.json overrides."
+              echo "::error::Run 'pnpm install' to regenerate the lockfile and commit the updated pnpm-lock.yaml."
+              rm -f "$ERR_FILE"
+              exit 1
+            fi
+            rm -f "$ERR_FILE"
+            echo "::warning::Install failed with a different error. Will retry in the Install dependencies step."
+          fi
+
+      - name: Install dependencies
+        run: |
+          max_attempts=3
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts"
+            if [ "${{ steps.pkg-manager.outputs.manager }}" = "pnpm" ]; then
+              pnpm install --frozen-lockfile && break
+            else
+              npm ci && break
+            fi
+            if [ $attempt -lt $max_attempts ]; then
+              echo "::warning::Install step failed on attempt $attempt. Retrying in 5 seconds..."
+              sleep 5
+            fi
+            attempt=$((attempt + 1))
+          done
+          if [ $attempt -gt $max_attempts ]; then
+            echo "::error::Install step failed after $max_attempts attempts."
+            exit 1
+          fi
+
+      - name: Build plugin
+        run: npx @kinvolk/headlamp-plugin build
+
+      - name: Lint
+        run: |
+          if [ "${{ steps.pkg-manager.outputs.manager }}" = "pnpm" ]; then
+            pnpm run lint
+          else
+            npm run lint
+          fi
+
+      - name: Type-check
+        run: |
+          if [ "${{ steps.pkg-manager.outputs.manager }}" = "pnpm" ]; then
+            pnpm run tsc
+          else
+            npm run tsc
+          fi
+
+      - name: Format check
+        run: |
+          if [ "${{ steps.pkg-manager.outputs.manager }}" = "pnpm" ]; then
+            pnpm run format:check
+          else
+            npm run format:check
+          fi
+
+      - name: Run tests
+        run: |
+          if [ "${{ steps.pkg-manager.outputs.manager }}" = "pnpm" ]; then
+            pnpm test
+          else
+            npm test
+          fi
+
+      - name: Security audit
+        run: |
+          if [ "${{ steps.pkg-manager.outputs.manager }}" = "pnpm" ]; then
+            npx audit-ci --pnpm --audit-level=high --config ./audit-ci.jsonc
+          else
+            npx audit-ci --npm --audit-level=high --config ./audit-ci.jsonc
+          fi
