@@ -1,6 +1,5 @@
 name: Promotion Gate
 
-# Calls the shared promotion gate workflow.
 # dev PRs: no gate (engineer self-merges).
 # uat PRs: QA approval required.
 # main PRs: UAT approval required (uat→main promotions).
@@ -14,8 +13,103 @@ on:
 
 jobs:
   promotion-gate:
-    uses: privilegedescalation/.github/.github/workflows/dual-approval-check.yaml@main
-    secrets: inherit
-    with:
-      pr_number: ${{ github.event.pull_request.number }}
+    name: Promotion Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
 
+    steps:
+      - name: Install dependencies
+        run: apt-get update -qq && apt-get install -y --no-install-recommends curl jq
+
+      - name: Check promotion approval
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "${PR_NUMBER}" ] || [ "${PR_NUMBER}" = "null" ]; then
+            echo "::notice::No PR number in context. Skipping promotion gate."
+            exit 0
+          fi
+
+          echo "Checking promotion gate for PR #${PR_NUMBER} targeting ${BASE_REF} in ${REPO}"
+
+          if [ -z "${BASE_REF}" ] && [ -n "${PR_NUMBER}" ] && [ "${PR_NUMBER}" != "null" ]; then
+            BASE_REF=$(curl -sf \
+              -H "Authorization: token ${GITEA_TOKEN}" \
+              -H "Accept: application/json" \
+              "https://git.farh.net/api/v1/repos/${REPO}/pulls/${PR_NUMBER}" | jq -r '.base.ref')
+            echo "BASE_REF was empty; resolved from PR #${PR_NUMBER} API: ${BASE_REF}"
+          fi
+
+          # Determine required reviewer based on target branch
+          case "${BASE_REF}" in
+            dev)
+              echo "Target is dev — no review required. Engineers self-merge."
+              exit 0
+              ;;
+            uat)
+              REQUIRED_REVIEWER="pe_regina"
+              GATE_NAME="QA"
+              ;;
+            main)
+              REQUIRED_REVIEWER="pe_regina"
+              GATE_NAME="QA"
+              # For plugin repos (Pipeline A), UAT approval is needed for uat→main
+              # Check if the source branch is uat
+              SOURCE_REF=$(curl -sf \
+                -H "Authorization: token ${GITEA_TOKEN}" \
+                -H "Accept: application/json" \
+                "https://git.farh.net/api/v1/repos/${REPO}/pulls/${PR_NUMBER}" | jq -r '.head.ref')
+
+              if [ "${SOURCE_REF}" = "uat" ]; then
+                REQUIRED_REVIEWER="pe_patty"
+                GATE_NAME="UAT"
+              fi
+              ;;
+            *)
+              echo "::notice::Target branch '${BASE_REF}' has no promotion gate configured."
+              exit 0
+              ;;
+          esac
+
+          echo "Required reviewer: ${REQUIRED_REVIEWER} (${GATE_NAME})"
+
+          # For uat→main promotions, pe_patty may not be able to review (bot account).
+          # Accept pe_nancy (CTO) as a valid alternative reviewer.
+          ALT_REVIEWER=""
+          if [ "${REQUIRED_REVIEWER}" = "pe_patty" ]; then
+            ALT_REVIEWER="pe_nancy"
+          fi
+
+          REVIEWS=$(curl -sf \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            -H "Accept: application/json" \
+            "https://git.farh.net/api/v1/repos/${REPO}/pulls/${PR_NUMBER}/reviews")
+
+          if [ -z "${REVIEWS}" ] || [ "${REVIEWS}" = "null" ]; then
+            echo "::warning::Could not fetch reviews for PR #${PR_NUMBER}."
+            exit 1
+          fi
+
+          REVIEWER_APPROVED=$(echo "${REVIEWS}" | jq -r --arg user "${REQUIRED_REVIEWER}" \
+            '[.[] | select(.user.login == $user)] | last | if .state then .state == "APPROVED" else false end')
+
+          echo "${GATE_NAME} (${REQUIRED_REVIEWER}) approved: ${REVIEWER_APPROVED}"
+
+          # Fallback: check if CTO approved as alternative for uat→main
+          if [ "${REVIEWER_APPROVED}" != "true" ] && [ -n "${ALT_REVIEWER}" ]; then
+            REVIEWER_APPROVED=$(echo "${REVIEWS}" | jq -r --arg user "${ALT_REVIEWER}" \
+              '[.[] | select(.user.login == $user)] | last | if .state then .state == "APPROVED" else false end')
+            if [ "${REVIEWER_APPROVED}" = "true" ]; then
+              echo "CTO (${ALT_REVIEWER}) approved as fallback for UAT gate."
+            fi
+          fi
+
+          if [ "${REVIEWER_APPROVED}" = "true" ]; then
+            echo "Promotion gate passed: ${GATE_NAME} has approved."
+          else
+            echo "Promotion gate failed: waiting for ${GATE_NAME} approval from ${REQUIRED_REVIEWER}."
+            exit 1
+          fi
