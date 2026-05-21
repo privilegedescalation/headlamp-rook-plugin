@@ -14,12 +14,392 @@ permissions:
   contents: write
   pull-requests: write
 
-jobs:
-  release:
-    uses: privilegedescalation/.github/.github/workflows/plugin-release.yaml@main
-    secrets:
-      RELEASE_APP_ID: ${{ secrets.RELEASE_APP_ID }}
-      RELEASE_APP_PRIVATE_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
-    with:
-      version: ${{ inputs.version || github.event.client_payload.version }}
+concurrency:
+  group: release
+  cancel-in-progress: false
 
+jobs:
+  check-secrets:
+    runs-on: runners-privilegedescalation
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - name: Verify GITEA_RELEASE_TOKEN is configured
+        id: check
+        env:
+          GITEA_RELEASE_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
+        run: |
+          if [ -z "$GITEA_RELEASE_TOKEN" ]; then
+            echo "::notice::GITEA_RELEASE_TOKEN org secret is not configured (see PRI-1533). Release skipped — no artifacts will be created."
+            echo "ready=false" >> $GITHUB_OUTPUT
+          else
+            echo "ready=true" >> $GITHUB_OUTPUT
+          fi
+
+  ci:
+    needs: check-secrets
+    if: needs.check-secrets.outputs.ready == 'true'
+    uses: ./.github/workflows/ci.yaml
+    with:
+      node-version: ${{ inputs.node-version || '22' }}
+
+  check-token-permissions:
+    needs: check-secrets
+    if: needs.check-secrets.outputs.ready == 'true'
+    runs-on: runners-privilegedescalation
+    outputs:
+      has_write: ${{ steps.check.outputs.has_write }}
+    steps:
+      - name: Check write permissions via API
+        id: check
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            -H "Accept: application/json" \
+            "https://git.farh.net/api/v1/repos/${REPO}/git/refs" \
+            -d '{"ref":"refs/heads/_release_check","sha":"${{ github.sha }}"}')
+          if [ "$HTTP_CODE" = "201" ]; then
+            echo "::notice::Token has write permission — cleaning up test ref."
+            curl -sf -o /dev/null -w "%{http_code}" \
+              -X DELETE \
+              -H "Authorization: token ${GITEA_TOKEN}" \
+              "https://git.farh.net/api/v1/repos/${REPO}/git/refs/heads/_release_check"
+            echo "has_write=true" >> $GITHUB_OUTPUT
+          elif [ "$HTTP_CODE" = "403" ]; then
+            echo "::error::Token lacks write permission. Release cannot push tags or branches."
+            echo "has_write=false" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "::warning::Unexpected response ($HTTP_CODE) when checking write permission."
+            echo "has_write=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+  check-tag:
+    needs: check-secrets
+    if: needs.check-secrets.outputs.ready == 'true'
+    runs-on: runners-privilegedescalation
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - name: Check if tag already exists
+        id: check
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            "https://git.farh.net/api/v1/repos/${REPO}/git/refs/tags/v${{ inputs.version }}")
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "::notice::Tag v${{ inputs.version }} already exists. Release skipped (not an error)."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+  release:
+    needs: [ci, check-tag, check-secrets, check-token-permissions]
+    if: needs.check-secrets.outputs.ready == 'true' && needs.check-tag.outputs.skip != 'true' && needs.check-token-permissions.outputs.has_write == 'true'
+    runs-on: runners-privilegedescalation
+    timeout-minutes: 10
+
+    steps:
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Version must be in X.Y.Z format"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect package manager
+        id: pkg-manager
+        run: |
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "manager=pnpm" >> $GITHUB_OUTPUT
+            echo "lockfile=pnpm-lock.yaml" >> $GITHUB_OUTPUT
+            PM=$(python3 -c "import json,sys; d=json.load(open('package.json')); print('true' if d.get('packageManager','').startswith('pnpm@') else 'false')" 2>/dev/null || echo "false")
+            echo "has_package_manager=$PM" >> $GITHUB_OUTPUT
+          else
+            echo "manager=npm" >> $GITHUB_OUTPUT
+            echo "lockfile=package-lock.json" >> $GITHUB_OUTPUT
+            echo "has_package_manager=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.node-version || '22' }}
+          cache: ${{ steps.pkg-manager.outputs.manager == 'npm' && 'npm' || '' }}
+
+      - name: Setup pnpm (via Corepack)
+        if: steps.pkg-manager.outputs.manager == 'pnpm' && steps.pkg-manager.outputs.has_package_manager == 'true'
+        run: |
+          npm install -g corepack
+          corepack enable pnpm
+          corepack install
+
+      - name: Setup pnpm (version latest)
+        if: steps.pkg-manager.outputs.manager == 'pnpm' && steps.pkg-manager.outputs.has_package_manager == 'false'
+        uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+          version: latest
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        if: steps.pkg-manager.outputs.manager == 'pnpm'
+        run: echo "dir=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        if: steps.pkg-manager.outputs.manager == 'pnpm'
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-store.outputs.dir }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Configure Git
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git remote set-url origin "https://x-access-token:${GITEA_TOKEN}@git.farh.net/${{ github.repository }}.git"
+
+      - name: Update version in package.json
+        run: |
+          if [ "${{ steps.pkg-manager.outputs.manager }}" = "pnpm" ]; then
+            pnpm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
+          else
+            npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
+          fi
+
+      - name: Update artifacthub-pkg.yml
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ -f artifacthub-pkg.yml ]; then
+            PKG_NAME=$(grep '^name:' artifacthub-pkg.yml | cut -d: -f2 | tr -d ' "')
+          else
+            PKG_NAME=$(jq -r .name package.json | sed 's|^@[^/]*/||')
+          fi
+          RELEASE_URL="https://git.farh.net/${REPO}/releases/download/v${VERSION}/${PKG_NAME}-${VERSION}.tar.gz"
+          sed -i "s/^version:.*/version: \"${VERSION}\"/" artifacthub-pkg.yml
+          sed -i "s|headlamp/plugin/archive-url:.*|headlamp/plugin/archive-url: \"${RELEASE_URL}\"|" artifacthub-pkg.yml
+
+      - name: Update appVersion from upstream release
+        if: inputs.upstream-repo != ''
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
+        run: |
+          APP_VERSION=$(curl -sf \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            "https://git.farh.net/api/v1/repos/${{ inputs.upstream-repo }}/releases/latest" | jq -r '.tag_name | ltrimstr("v")')
+          if [ -z "$APP_VERSION" ] || [ "$APP_VERSION" = "null" ]; then
+            echo "::warning::Could not fetch latest upstream release, skipping appVersion update"
+          else
+            sed -i "s|^appVersion:.*|appVersion: \"${APP_VERSION}\"|" artifacthub-pkg.yml
+            echo "appVersion set to ${APP_VERSION}"
+          fi
+
+      - name: Install dependencies
+        run: |
+          max_attempts=3
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts"
+            if [ "${{ steps.pkg-manager.outputs.manager }}" = "pnpm" ]; then
+              pnpm install --frozen-lockfile && break
+            else
+              npm ci && break
+            fi
+            if [ $attempt -lt $max_attempts ]; then
+              echo "::warning::Install step failed on attempt $attempt. Retrying in 5 seconds..."
+              sleep 5
+            fi
+            attempt=$((attempt + 1))
+          done
+          if [ $attempt -gt $max_attempts ]; then
+            echo "::error::Install step failed after $max_attempts attempts."
+            exit 1
+          fi
+
+      - name: Build plugin
+        run: npx @kinvolk/headlamp-plugin build
+
+      - name: Package plugin
+        run: npx @kinvolk/headlamp-plugin package
+
+      - name: Prepare release tarball
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ -f artifacthub-pkg.yml ]; then
+            PKG_NAME=$(grep '^name:' artifacthub-pkg.yml | cut -d: -f2 | tr -d ' "')
+          else
+            PKG_NAME=$(jq -r .name package.json | sed 's|^@[^/]*/||')
+          fi
+          TARBALL="${PKG_NAME}-${VERSION}.tar.gz"
+          for f in *.tar.gz; do
+            [ "$f" != "$TARBALL" ] && mv "$f" "$TARBALL"
+          done
+          if [ ! -f "$TARBALL" ]; then
+            echo "Error: Expected tarball $TARBALL not found"
+            ls -la *.tar.gz 2>/dev/null || echo "No .tar.gz files found"
+            exit 1
+          fi
+          echo "TARBALL=$TARBALL" >> $GITHUB_ENV
+          echo "PKG_NAME=$PKG_NAME" >> $GITHUB_ENV
+
+      - name: Validate tarball
+        run: |
+          echo "Tarball: ${{ env.TARBALL }}"
+          ls -lh "${{ env.TARBALL }}"
+          tar -tzf "${{ env.TARBALL }}" | head -20
+          tar -tzf "${{ env.TARBALL }}" | grep -q "main.js" || { echo "Error: main.js not found in tarball"; exit 1; }
+
+      - name: Compute checksum
+        run: |
+          CHECKSUM=$(sha256sum "${{ env.TARBALL }}" | awk '{print $1}')
+          echo "CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
+          sed -i "s|headlamp/plugin/archive-checksum:.*|headlamp/plugin/archive-checksum: sha256:${CHECKSUM}|" artifacthub-pkg.yml
+
+      - name: Commit and tag
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          BRANCH="release/v${VERSION}"
+          if git ls-remote --exit-code origin "refs/heads/$BRANCH" 2>/dev/null; then
+            echo "::notice::Branch $BRANCH already exists — deleting for clean re-trigger."
+            git push origin --delete "$BRANCH"
+          fi
+          git checkout -b "$BRANCH"
+          git add package.json "${{ steps.pkg-manager.outputs.lockfile }}" artifacthub-pkg.yml
+          git commit -m "release: v${VERSION}"
+          git tag "v${VERSION}"
+          git push origin "$BRANCH"
+          git push origin "refs/tags/v${VERSION}"
+
+      - name: Create Gitea Release
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          TARBALL="${{ env.TARBALL }}"
+          RESPONSE=$(curl -sf -X POST \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            -H "Content-Type: application/json" \
+            "https://git.farh.net/api/v1/repos/${REPO}/releases" \
+            -d "{
+              \"tag_name\": \"v${VERSION}\",
+              \"name\": \"Release v${VERSION}\",
+              \"draft\": false,
+              \"prerelease\": false
+            }")
+          if [ -z "$RESPONSE" ]; then
+            echo "::warning::Release creation returned empty response (may already exist)"
+          else
+            echo "::notice::Release v${VERSION} created successfully"
+          fi
+          UPLOAD_URL=$(echo "$RESPONSE" | jq -r '.upload_url' 2>/dev/null || echo "")
+          if [ -n "$UPLOAD_URL" ] && [ "$UPLOAD_URL" != "null" ]; then
+            UPLOAD_URL="${UPLOAD_URL%%\{*}"
+            curl -sf -X POST \
+              -H "Authorization: token ${GITEA_TOKEN}" \
+              -H "Content-Type: application/octet-stream" \
+              "${UPLOAD_URL}?name=${TARBALL}" \
+              --data-binary "@${TARBALL}"
+            echo "::notice::Tarball uploaded successfully"
+          fi
+
+      - name: Create PR for version bump
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -o pipefail
+          VERSION="${{ inputs.version }}"
+          BODY=$(printf "Automated version bump and checksum update for v%s.\n\ncc @cpfarhood" "${VERSION}")
+          RESPONSE=$(curl -sf -X POST \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            -H "Content-Type: application/json" \
+            "https://git.farh.net/api/v1/repos/${REPO}/pulls" \
+            -d "{
+              \"title\": \"release: v${VERSION}\",
+              \"body\": \"$BODY\",
+              \"base\": \"main\",
+              \"head\": \"release/v${VERSION}\"
+            }")
+          PR_NUMBER=$(echo "$RESPONSE" | jq -r '.number' 2>/dev/null || echo "")
+          if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" = "null" ]; then
+            EXISTING=$(curl -sf \
+              -H "Authorization: token ${GITEA_TOKEN}" \
+              "https://git.farh.net/api/v1/repos/${REPO}/pulls?state=open&base=main&head=release/v${VERSION}" \
+              | jq -r '.[0].number' 2>/dev/null || echo "")
+            if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+              PR_NUMBER="$EXISTING"
+              echo "::notice::Open PR #${PR_NUMBER} for release/v${VERSION} already exists — skipping creation."
+            else
+              echo "::error::Could not determine PR number for release/v${VERSION}."
+              exit 1
+            fi
+          fi
+          echo "::notice::Working with PR #${PR_NUMBER}"
+
+          PR_STATE=$(curl -sf \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            "https://git.farh.net/api/v1/repos/${REPO}/pulls/${PR_NUMBER}" \
+            | jq -r '.state' 2>/dev/null || echo "")
+          if [ "$PR_STATE" = "merged" ]; then
+            echo "::notice::PR #${PR_NUMBER} was already merged. Nothing to do."
+            exit 0
+          fi
+
+          MERGE_RESULT=$(curl -sf -X POST \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            -H "Content-Type: application/json" \
+            "https://git.farh.net/api/v1/repos/${REPO}/pulls/${PR_NUMBER}/merge" \
+            -d '{"do": "squash"}')
+          if echo "$MERGE_RESULT" | jq -e '.merged' 2>/dev/null; then
+            echo "PR merged successfully."
+          else
+            if [ "$PR_STATE" = "merged" ]; then
+              echo "PR was already merged."
+            else
+              echo "::warning::Merge response: $MERGE_RESULT"
+            fi
+          fi
+
+      - name: Verify checksums are consistent (main == tag == tarball)
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          TARBALL_CS=$(sha256sum "${{ env.TARBALL }}" | awk '{print $1}')
+          TAG_CS=$(git show "v${VERSION}:artifacthub-pkg.yml" 2>/dev/null \
+            | grep "archive-checksum" | awk '{print $2}' | sed 's/sha256://')
+          MAIN_CS=$(git fetch origin main 2>/dev/null; git show "origin/main:artifacthub-pkg.yml" \
+            | grep "archive-checksum" | awk '{print $2}' | sed 's/sha256://')
+          echo "Tarball SHA256 : $TARBALL_CS"
+          echo "Tag artifacthub: $TAG_CS"
+          echo "Main artifacthub: $MAIN_CS"
+          FAIL=0
+          [ "$TARBALL_CS" != "$TAG_CS"  ] && echo "ERROR: tag checksum mismatch!"  && FAIL=1
+          [ "$TARBALL_CS" != "$MAIN_CS" ] && echo "ERROR: main checksum mismatch!" && FAIL=1
+          [ "$FAIL" = "1" ] && exit 1
+          echo "All checksums consistent — ArtifactHub will index correctly."
