@@ -50,6 +50,10 @@ Rook-Ceph must be deployed in the `rook-ceph` namespace with standard labels. Th
 
 Browse the Headlamp Plugin Manager (Settings → Plugins → Catalog) and install **headlamp-rook-plugin** directly.
 
+
+
+> See [Plugin Installation Policy](https://git.farh.net/privilegedescalation/privilegedescalation.com/wiki/Plugin-Installation-Policy) for approved installation methods.
+
 ## RBAC & Security Setup
 
 The plugin reads Rook-Ceph CRDs and Kubernetes resources. Your Headlamp service account needs:
