@@ -114,6 +114,8 @@ jobs:
     needs: check-secrets
     if: needs.check-secrets.outputs.ready == 'true'
     runs-on: runners-privilegedescalation
+    env:
+      RESOLVED_VERSION: ${{ inputs.version || github.event.client_payload.version }}
     outputs:
       skip: ${{ steps.check.outputs.skip }}
     steps:
@@ -125,9 +127,9 @@ jobs:
         run: |
           HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
             -H "Authorization: token ${GITEA_TOKEN}" \
-            "https://git.farh.net/api/v1/repos/${REPO}/git/refs/tags/v${{ inputs.version }}")
+            "https://git.farh.net/api/v1/repos/${REPO}/git/refs/tags/v${{ env.RESOLVED_VERSION }}")
           if [ "$HTTP_CODE" = "200" ]; then
-            echo "::notice::Tag v${{ inputs.version }} already exists. Release skipped (not an error)."
+            echo "::notice::Tag v${{ env.RESOLVED_VERSION }} already exists. Release skipped (not an error)."
             echo "skip=true" >> $GITHUB_OUTPUT
           else
             echo "skip=false" >> $GITHUB_OUTPUT
@@ -138,11 +140,13 @@ jobs:
     if: needs.check-secrets.outputs.ready == 'true' && needs.check-tag.outputs.skip != 'true' && needs.check-token-permissions.outputs.has_write == 'true'
     runs-on: runners-privilegedescalation
     timeout-minutes: 10
+    env:
+      RESOLVED_VERSION: ${{ inputs.version || github.event.client_payload.version }}
 
     steps:
       - name: Validate version format
         run: |
-          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ ! "${{ env.RESOLVED_VERSION }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Error: Version must be in X.Y.Z format"
             exit 1
           fi
@@ -212,16 +216,16 @@ jobs:
       - name: Update version in package.json
         run: |
           if [ "${{ steps.pkg-manager.outputs.manager }}" = "pnpm" ]; then
-            pnpm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
+            pnpm version ${{ env.RESOLVED_VERSION }} --no-git-tag-version --allow-same-version
           else
-            npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
+            npm version ${{ env.RESOLVED_VERSION }} --no-git-tag-version --allow-same-version
           fi
 
       - name: Update artifacthub-pkg.yml
         env:
           REPO: ${{ github.repository }}
         run: |
-          VERSION="${{ inputs.version }}"
+          VERSION="${{ env.RESOLVED_VERSION }}"
           if [ -f artifacthub-pkg.yml ]; then
             PKG_NAME=$(grep '^name:' artifacthub-pkg.yml | cut -d: -f2 | tr -d ' "')
           else
@@ -276,7 +280,7 @@ jobs:
 
       - name: Prepare release tarball
         run: |
-          VERSION="${{ inputs.version }}"
+          VERSION="${{ env.RESOLVED_VERSION }}"
           if [ -f artifacthub-pkg.yml ]; then
             PKG_NAME=$(grep '^name:' artifacthub-pkg.yml | cut -d: -f2 | tr -d ' "')
           else
@@ -311,7 +315,7 @@ jobs:
         env:
           GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
         run: |
-          VERSION="${{ inputs.version }}"
+          VERSION="${{ env.RESOLVED_VERSION }}"
           BRANCH="release/v${VERSION}"
           if git ls-remote --exit-code origin "refs/heads/$BRANCH" 2>/dev/null; then
             echo "::notice::Branch $BRANCH already exists — deleting for clean re-trigger."
@@ -329,7 +333,7 @@ jobs:
           GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          VERSION="${{ inputs.version }}"
+          VERSION="${{ env.RESOLVED_VERSION }}"
           TARBALL="${{ env.TARBALL }}"
           RESPONSE=$(curl -sf -X POST \
             -H "Authorization: token ${GITEA_TOKEN}" \
@@ -363,7 +367,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -o pipefail
-          VERSION="${{ inputs.version }}"
+          VERSION="${{ env.RESOLVED_VERSION }}"
           BODY=$(printf "Automated version bump and checksum update for v%s.\n\ncc @cpfarhood" "${VERSION}")
           RESPONSE=$(curl -sf -X POST \
             -H "Authorization: token ${GITEA_TOKEN}" \
@@ -420,7 +424,7 @@ jobs:
           GITEA_TOKEN: ${{ secrets.GITEA_RELEASE_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          VERSION="${{ inputs.version }}"
+          VERSION="${{ env.RESOLVED_VERSION }}"
           TARBALL_CS=$(sha256sum "${{ env.TARBALL }}" | awk '{print $1}')
           TAG_CS=$(git show "v${VERSION}:artifacthub-pkg.yml" 2>/dev/null \
             | grep "archive-checksum" | awk '{print $2}' | sed 's/sha256://')
