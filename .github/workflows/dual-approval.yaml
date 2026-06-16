@@ -1,20 +1,134 @@
-name: Dual Approval (CTO + QA)
+name: Promotion Gate
 
-# Calls the shared dual-approval-check workflow.
-# Passes when both privilegedescalation-cto and privilegedescalation-qa
-# have approved the PR. Add "Dual Approval (CTO + QA)" to required_status_checks
-# in branch protection to enforce this gate.
+# dev PRs: no gate (engineer self-merges).
+# uat PRs: QA approval required.
+# main PRs: UAT approval required (uat→main promotions).
 
 on:
   pull_request_review:
     types: [submitted, dismissed]
   pull_request:
-    branches: [main]
+    branches: [uat, main]
     types: [opened, reopened, synchronize]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
-  dual-approval:
-    uses: privilegedescalation/.github/.github/workflows/dual-approval-check.yaml@main
-    secrets: inherit
-    with:
-      pr_number: ${{ github.event.pull_request.number }}
+  promotion-gate:
+    name: Promotion Gate
+    runs-on: ubuntu-latest
+    container: ubuntu:latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Install dependencies
+        run: apt-get update -qq && apt-get install -y --no-install-recommends ca-certificates curl jq
+
+      - name: Check promotion approval
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "${PR_NUMBER}" ] || [ "${PR_NUMBER}" = "null" ]; then
+            echo "::notice::No PR number in context. Skipping promotion gate."
+            exit 0
+          fi
+
+          # On pull_request_review events github.base_ref is empty; resolve via API.
+          if [ -z "${BASE_REF}" ] && [ -n "${PR_NUMBER}" ] && [ "${PR_NUMBER}" != "null" ]; then
+            BASE_REF=$(curl -sf \
+              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}" | jq -r '.base.ref')
+            echo "Resolved BASE_REF from GitHub API: ${BASE_REF}"
+          fi
+
+          echo "Checking promotion gate for PR #${PR_NUMBER} targeting ${BASE_REF} in ${REPO}"
+
+          # Determine required reviewer based on target branch
+          case "${BASE_REF}" in
+            dev)
+              echo "Target is dev — no review required. Engineers self-merge."
+              exit 0
+              ;;
+            uat)
+              REQUIRED_REVIEWER="regression-regina-pe[bot]"
+              GATE_NAME="QA"
+              ;;
+            main)
+              REQUIRED_REVIEWER="regression-regina-pe[bot]"
+              GATE_NAME="QA"
+              # For plugin repos (Pipeline A), UAT approval is needed for uat→main
+              SOURCE_REF=$(curl -sf \
+                -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}" | jq -r '.head.ref')
+
+              if [ "${SOURCE_REF}" = "uat" ]; then
+                REQUIRED_REVIEWER="pixel-patty-pe[bot]"
+                GATE_NAME="UAT"
+              fi
+              ;;
+            *)
+              echo "::notice::Target branch '${BASE_REF}' has no promotion gate configured."
+              exit 0
+              ;;
+          esac
+
+          echo "Required reviewer: ${REQUIRED_REVIEWER} (${GATE_NAME})"
+
+          # For uat→main promotions, pixel-patty-pe may not be able to review.
+          # Accept null-pointer-nancy-pe (CTO) as a valid alternative reviewer.
+          ALT_REVIEWER=""
+          if [ "${REQUIRED_REVIEWER}" = "pixel-patty-pe[bot]" ]; then
+            ALT_REVIEWER="null-pointer-nancy-pe[bot]"
+          fi
+
+          PR_DATA=$(curl -sf \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}")
+
+          PR_AUTHOR=$(echo "${PR_DATA}" | jq -r '.user.login')
+          echo "PR author: ${PR_AUTHOR}"
+
+          # Guard: PR author matches required reviewer — gate cannot be satisfied.
+          if [ "${PR_AUTHOR}" = "${REQUIRED_REVIEWER}" ] || [ "${PR_AUTHOR}" = "app/${REQUIRED_REVIEWER%\[bot\]}" ]; then
+            echo "::error::PR author (${PR_AUTHOR}) is the required reviewer (${REQUIRED_REVIEWER}). GitHub prevents self-approval. The PR must be re-authored under a different identity."
+            exit 1
+          fi
+
+          REVIEWS=$(curl -sf \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}/reviews")
+
+          if [ -z "${REVIEWS}" ] || [ "${REVIEWS}" = "null" ]; then
+            echo "::warning::Could not fetch reviews for PR #${PR_NUMBER}."
+            exit 1
+          fi
+
+          REVIEWER_APPROVED=$(echo "${REVIEWS}" | jq -r --arg user "${REQUIRED_REVIEWER}" \
+            '[.[] | select(.user.login == $user)] | last | if .state then .state == "APPROVED" else false end')
+
+          echo "${GATE_NAME} (${REQUIRED_REVIEWER}) approved: ${REVIEWER_APPROVED}"
+
+          # Fallback: check if CTO approved as alternative for uat→main
+          if [ "${REVIEWER_APPROVED}" != "true" ] && [ -n "${ALT_REVIEWER}" ]; then
+            REVIEWER_APPROVED=$(echo "${REVIEWS}" | jq -r --arg user "${ALT_REVIEWER}" \
+              '[.[] | select(.user.login == $user)] | last | if .state then .state == "APPROVED" else false end')
+            if [ "${REVIEWER_APPROVED}" = "true" ]; then
+              echo "CTO (${ALT_REVIEWER}) approved as fallback for UAT gate."
+            fi
+          fi
+
+          if [ "${REVIEWER_APPROVED}" = "true" ]; then
+            echo "Promotion gate passed: ${GATE_NAME} has approved."
+          else
+            echo "Promotion gate failed: waiting for ${GATE_NAME} approval from ${REQUIRED_REVIEWER}."
+            exit 1
+          fi
