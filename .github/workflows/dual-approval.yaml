@@ -24,40 +24,17 @@ jobs:
 
       - name: Check promotion approval
         env:
-          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          if [ -z "${HEAD_REF}" ] || [ "${HEAD_REF}" = "null" ]; then
-            echo "::notice::No head branch in context. Skipping promotion gate."
+          if [ -z "${PR_NUMBER}" ] || [ "${PR_NUMBER}" = "null" ]; then
+            echo "::notice::No PR number in context. Skipping promotion gate."
             exit 0
           fi
 
-          echo "Checking promotion gate for head=${HEAD_REF} → base=${BASE_REF} in ${REPO}"
-
-          # Resolve the Gitea PR by head+base branch — do NOT key off the GitHub PR number.
-          # GitHub and Gitea PR numbering have diverged; using the number hits the wrong Gitea PR.
-          ALL_GITEA_PRS=$(curl -sf \
-            -H "Authorization: token ${GITEA_TOKEN}" \
-            -H "Accept: application/json" \
-            "https://git.farh.net/api/v1/repos/${REPO}/pulls?state=open&limit=50&page=1")
-
-          if [ -z "${ALL_GITEA_PRS}" ] || [ "${ALL_GITEA_PRS}" = "null" ]; then
-            echo "::error::Could not fetch open Gitea PRs for ${REPO}. Gate fails closed."
-            exit 1
-          fi
-
-          GITEA_PR_NUMBER=$(printf '%s' "${ALL_GITEA_PRS}" | jq -r \
-            --arg head "${HEAD_REF}" --arg base "${BASE_REF}" \
-            '[.[] | select(.head.ref == $head and .base.ref == $base)] | if length == 1 then .[0].number | tostring else "" end')
-
-          if [ -z "${GITEA_PR_NUMBER}" ]; then
-            echo "::error::No unique open Gitea PR found with head=${HEAD_REF} and base=${BASE_REF}. Gate fails closed."
-            exit 1
-          fi
-
-          echo "Resolved Gitea PR #${GITEA_PR_NUMBER} (head=${HEAD_REF} → base=${BASE_REF})"
+          echo "Checking promotion gate for PR #${PR_NUMBER} targeting ${BASE_REF} in ${REPO}"
 
           # Determine required reviewer based on target branch
           case "${BASE_REF}" in
@@ -66,17 +43,22 @@ jobs:
               exit 0
               ;;
             uat)
-              REQUIRED_REVIEWER="pe_regina"
+              REQUIRED_REVIEWER="regression-regina-pe[bot]"
               GATE_NAME="QA"
               ;;
             main)
+              REQUIRED_REVIEWER="regression-regina-pe[bot]"
+              GATE_NAME="QA"
               # For plugin repos (Pipeline A), UAT approval is needed for uat→main
-              if [ "${HEAD_REF}" = "uat" ]; then
-                REQUIRED_REVIEWER="pe_patty"
+              # Check if the source branch is uat
+              SOURCE_REF=$(curl -sf \
+                -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}" | jq -r '.head.ref')
+
+              if [ "${SOURCE_REF}" = "uat" ]; then
+                REQUIRED_REVIEWER="pixel-patty-pe[bot]"
                 GATE_NAME="UAT"
-              else
-                REQUIRED_REVIEWER="pe_regina"
-                GATE_NAME="QA"
               fi
               ;;
             *)
@@ -87,31 +69,31 @@ jobs:
 
           echo "Required reviewer: ${REQUIRED_REVIEWER} (${GATE_NAME})"
 
-          # For uat→main promotions, pe_patty may not be able to review (bot account).
-          # Accept pe_nancy (CTO) as a valid alternative reviewer.
+          # For uat→main promotions, pixel-patty-pe may not be able to review.
+          # Accept null-pointer-nancy-pe (CTO) as a valid alternative reviewer.
           ALT_REVIEWER=""
-          if [ "${REQUIRED_REVIEWER}" = "pe_patty" ]; then
-            ALT_REVIEWER="pe_nancy"
+          if [ "${REQUIRED_REVIEWER}" = "pixel-patty-pe[bot]" ]; then
+            ALT_REVIEWER="null-pointer-nancy-pe[bot]"
           fi
 
           REVIEWS=$(curl -sf \
-            -H "Authorization: token ${GITEA_TOKEN}" \
-            -H "Accept: application/json" \
-            "https://git.farh.net/api/v1/repos/${REPO}/pulls/${GITEA_PR_NUMBER}/reviews")
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}/reviews")
 
           if [ -z "${REVIEWS}" ] || [ "${REVIEWS}" = "null" ]; then
-            echo "::warning::Could not fetch reviews for Gitea PR #${GITEA_PR_NUMBER}."
+            echo "::warning::Could not fetch reviews for PR #${PR_NUMBER}."
             exit 1
           fi
 
-          REVIEWER_APPROVED=$(printf '%s' "${REVIEWS}" | jq -r --arg user "${REQUIRED_REVIEWER}" \
+          REVIEWER_APPROVED=$(echo "${REVIEWS}" | jq -r --arg user "${REQUIRED_REVIEWER}" \
             '[.[] | select(.user.login == $user)] | last | if .state then .state == "APPROVED" else false end')
 
           echo "${GATE_NAME} (${REQUIRED_REVIEWER}) approved: ${REVIEWER_APPROVED}"
 
           # Fallback: check if CTO approved as alternative for uat→main
           if [ "${REVIEWER_APPROVED}" != "true" ] && [ -n "${ALT_REVIEWER}" ]; then
-            REVIEWER_APPROVED=$(printf '%s' "${REVIEWS}" | jq -r --arg user "${ALT_REVIEWER}" \
+            REVIEWER_APPROVED=$(echo "${REVIEWS}" | jq -r --arg user "${ALT_REVIEWER}" \
               '[.[] | select(.user.login == $user)] | last | if .state then .state == "APPROVED" else false end')
             if [ "${REVIEWER_APPROVED}" = "true" ]; then
               echo "CTO (${ALT_REVIEWER}) approved as fallback for UAT gate."
