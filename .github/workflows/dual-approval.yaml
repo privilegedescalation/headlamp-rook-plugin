@@ -111,14 +111,14 @@ jobs:
             exit 1
           fi
 
-          REVIEWER_APPROVED=$(echo "${REVIEWS}" | jq -r --arg user "${REQUIRED_REVIEWER}" \
+          REVIEWER_APPROVED=$(printf '%s' "${REVIEWS}" | jq -r --arg user "${REQUIRED_REVIEWER}" \
             '[.[] | select(.user.login == $user)] | last | if .state then .state == "APPROVED" else false end')
 
           echo "${GATE_NAME} (${REQUIRED_REVIEWER}) approved: ${REVIEWER_APPROVED}"
 
           # Fallback: check if CTO approved as alternative for uat→main
           if [ "${REVIEWER_APPROVED}" != "true" ] && [ -n "${ALT_REVIEWER}" ]; then
-            REVIEWER_APPROVED=$(echo "${REVIEWS}" | jq -r --arg user "${ALT_REVIEWER}" \
+            REVIEWER_APPROVED=$(printf '%s' "${REVIEWS}" | jq -r --arg user "${ALT_REVIEWER}" \
               '[.[] | select(.user.login == $user)] | last | if .state then .state == "APPROVED" else false end')
             if [ "${REVIEWER_APPROVED}" = "true" ]; then
               echo "CTO (${ALT_REVIEWER}) approved as fallback for UAT gate."
