@@ -1,0 +1,20 @@
+{
+  // Allowlist for inherited dev-dependency CVEs from @kinvolk/headlamp-plugin
+  // CTO decision (PRI-854): these high-severity vulns are dev/build-time only,
+  // trace to @kinvolk/headlamp-plugin transitive deps (Picomatch, Vite, lodash),
+  // and do NOT ship in production plugin artifacts.
+  "allowlist": [
+    {
+      "id": "GHSA-hhpm-516h-p3p6",
+      "reason": "Picomatch ReDoS: devDependency only, does not ship in production plugin bundle"
+    },
+    {
+      "id": "GHSA-36xf-7xpp-53w5",
+      "reason": "Vite arbitrary file read: devDependency only, does not ship in production plugin bundle"
+    },
+    {
+      "id": "GHSA-jf8v-p3pp-93qh",
+      "reason": "lodash code injection via _.template: devDependency only, does not ship in production plugin bundle"
+    }
+  ]
+}
