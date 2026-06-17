@@ -21,7 +21,6 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    container: node:22-slim
 
     steps:
       - name: Checkout
