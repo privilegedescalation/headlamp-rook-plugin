@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 jobs:
   renovate:
-    runs-on: ubuntu-latest
+    runs-on: runners-privilegedescalation
     steps:
       - uses: actions/checkout@v4
       - uses: renovatebot/github-action@v46.1.15
