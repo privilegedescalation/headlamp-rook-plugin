@@ -18,7 +18,7 @@ permissions:
 jobs:
   promotion-gate:
     name: Promotion Gate
-    runs-on: ubuntu-latest
+    runs-on: runners-privilegedescalation
     container: ubuntu:latest
     timeout-minutes: 5
 
