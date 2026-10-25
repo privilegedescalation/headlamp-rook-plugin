@@ -9,7 +9,7 @@ Headlamp plugin for Rook-Ceph cluster visibility.
 - **Plugin name**: `rook`
 - **Rook-Ceph API group**: `ceph.rook.io/v1`
 - **Default namespace**: `rook-ceph`
-- **Reference plugin**: `../headlamp-tns-csi-plugin`
+- **Reference plugin**: `../headlamp-polaris-plugin`
 
 ## Commands
 
